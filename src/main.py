@@ -2,6 +2,16 @@ import flet as ft
 
 
 # interface
+def Compoundcard():
+    return ft.Container(
+        padding=ft.Padding(10, 10, 10, 10),
+        margin=ft.Margin(0, 0, 0, 0),
+        border_radius=ft.BorderRadius(10, 10, 10, 10),
+        bgcolor=ft.colors.SURFACE,
+        height=170,
+    )
+
+
 def Infocard(value: str, var=""):
     return ft.Container(
         padding=ft.Padding(10, 10, 10, 10),
@@ -48,7 +58,11 @@ def Infoinput():
                     bgcolor=ft.colors.SURFACE,
                     text_style=ft.TextStyle(color=ft.colors.SECONDARY, size=12),
                 ),
-                ft.IconButton(ft.icons.CHECK, style=ft.ButtonStyle(elevation=0.1), bgcolor=ft.colors.SECONDARY_CONTAINER),
+                ft.IconButton(
+                    ft.icons.CHECK,
+                    style=ft.ButtonStyle(elevation=0.1),
+                    bgcolor=ft.colors.SECONDARY_CONTAINER,
+                ),
             ],
         ),
     )
@@ -56,9 +70,25 @@ def Infoinput():
 
 def Infobar(value="--", var="None"):
     return ft.Container(
-        bgcolor=ft.colors.SURFACE,
+        bgcolor=ft.colors.SURFACE_VARIANT,
         border_radius=ft.BorderRadius(10, 10, 10, 10),
-        content=ft.Row(controls=[ft.Text(var, weight=ft.FontWeight.W_600)]),
+        content=ft.Row(
+            controls=[
+                ft.Container(
+                    padding=ft.Padding(20, 10, 0, 10),
+                    bgcolor=ft.colors.SURFACE_VARIANT,
+                    expand=True,
+                    content=ft.Text(var, weight=ft.FontWeight.W_600),
+                ),
+                ft.Container(
+                    padding=ft.Padding(0, 10, 0, 10),
+                    alignment=ft.alignment.center,
+                    bgcolor=ft.colors.SECONDARY_CONTAINER,
+                    expand=True,
+                    content=ft.Text(value, color=ft.colors.SURFACE_TINT),
+                ),
+            ]
+        ),
     )
 
 
@@ -89,12 +119,84 @@ sidebar = ft.Container(
         alignment=ft.MainAxisAlignment.START,
         horizontal_alignment=ft.VerticalAlignment.CENTER,
         controls=[
+            Compoundcard(),
             Infocard("0°F", var="T°"),
             Infoinput(),
             Infocard("0%", var="C%"),
             Infoinput(),
         ],
     ),
+)
+# chart
+chart = ft.BarChart(
+    bar_groups=[
+        ft.BarChartGroup(
+            x=0,
+            bar_rods=[
+                ft.BarChartRod(
+                    from_y=0,
+                    to_y=40,
+                    width=40,
+                    color=ft.colors.AMBER,
+                    tooltip="Apple",
+                    border_radius=0,
+                ),
+            ],
+        ),
+        ft.BarChartGroup(
+            x=1,
+            bar_rods=[
+                ft.BarChartRod(
+                    from_y=0,
+                    to_y=100,
+                    width=40,
+                    color=ft.colors.BLUE,
+                    tooltip="Blueberry",
+                    border_radius=0,
+                ),
+            ],
+        ),
+        ft.BarChartGroup(
+            x=2,
+            bar_rods=[
+                ft.BarChartRod(
+                    from_y=0,
+                    to_y=30,
+                    width=40,
+                    color=ft.colors.RED,
+                    tooltip="Cherry",
+                    border_radius=0,
+                ),
+            ],
+        ),
+        ft.BarChartGroup(
+            x=3,
+            bar_rods=[
+                ft.BarChartRod(
+                    from_y=0,
+                    to_y=60,
+                    width=40,
+                    color=ft.colors.ORANGE,
+                    tooltip="Orange",
+                    border_radius=0,
+                ),
+            ],
+        ),
+    ],
+    border=ft.border.all(1, ft.colors.GREY_400),
+    left_axis=ft.ChartAxis(
+        labels_size=40, title=ft.Text("Temperatura (grados Farenheig)"), title_size=40
+    ),
+    bottom_axis=ft.ChartAxis(
+        labels_size=40, title=ft.Text("Porcentaje de carbono"), title_size=40
+    ),
+    horizontal_grid_lines=ft.ChartGridLines(
+        color=ft.colors.GREY_300, width=1, dash_pattern=[3, 3]
+    ),
+    tooltip_bgcolor=ft.colors.with_opacity(0.5, ft.colors.GREY_300),
+    max_y=110,
+    interactive=True,
+    expand=True,
 )
 # view
 view_upperpart = ft.Container(
@@ -136,7 +238,9 @@ view_lowerpart = ft.Container(
     expand=True,
     content=ft.Row(
         controls=[
-            ft.Container(expand=True),
+            ft.Container(
+                expand=True, padding=ft.Padding(10, 10, 10, 10), content=chart
+            ),
             ft.Container(
                 width=200,
                 bgcolor=ft.colors.SURFACE,
@@ -148,7 +252,9 @@ view_lowerpart = ft.Container(
                         Infobar(),
                         Infobar(),
                         Infobar(),
-                    ]
+                    ],
+                    # alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ),
         ]
