@@ -1,23 +1,47 @@
 import flet as ft
 
+# styles
+card_style: dict = {
+    "main": {
+        "padding": ft.Padding(10, 10, 10, 10),
+        "margin": ft.Margin(0, 0, 0, 0),
+        "border_radius": ft.BorderRadius(10, 10, 10, 10),
+        "bgcolor": ft.colors.SURFACE,
+    },
+    "alt": {
+        "padding": ft.Padding(20, 20, 20, 20),
+        "margin": ft.Margin(0, 0, 0, 0),
+        "border_radius": ft.BorderRadius(10, 10, 10, 10),
+        "bgcolor": ft.colors.SECONDARY,
+    },
+}
+field_style: dict = {
+    "main": {
+        # "height": 30,
+        "filled": True,
+        "border_radius": ft.BorderRadius(10, 10, 10, 10),
+        "border_color": ft.colors.TRANSPARENT,
+        "bgcolor": ft.colors.SURFACE,
+        "text_style": ft.TextStyle(color=ft.colors.SECONDARY),  # , size=12),
+        "text_align": ft.TextAlign.CENTER,
+        "height" : 30, 
+        "text_size" : 12,
+        "text_vertical_align" : ft.VerticalAlignment.START
+    }
+}
+
 
 # interface
 def Compoundcard():
     return ft.Container(
-        padding=ft.Padding(10, 10, 10, 10),
-        margin=ft.Margin(0, 0, 0, 0),
-        border_radius=ft.BorderRadius(10, 10, 10, 10),
-        bgcolor=ft.colors.SURFACE,
+        **card_style.get("main"),
         height=170,
     )
 
 
 def Infocard(value: str, var=""):
     return ft.Container(
-        padding=ft.Padding(10, 10, 10, 10),
-        margin=ft.Margin(0, 0, 0, 0),
-        border_radius=ft.BorderRadius(10, 10, 10, 10),
-        bgcolor=ft.colors.SURFACE,
+        **card_style.get("main"),
         content=ft.Column(
             controls=[
                 ft.Container(
@@ -40,30 +64,6 @@ def Infocard(value: str, var=""):
                     ),
                 ),
             ]
-        ),
-    )
-
-
-def Infoinput():
-    return ft.Container(
-        content=ft.Row(
-            alignment=ft.MainAxisAlignment.CENTER,
-            controls=[
-                ft.TextField(
-                    height=30,
-                    width=110,
-                    filled=True,
-                    border_radius=ft.BorderRadius(10, 10, 10, 10),
-                    border_color=ft.colors.TRANSPARENT,
-                    bgcolor=ft.colors.SURFACE,
-                    text_style=ft.TextStyle(color=ft.colors.SECONDARY, size=12),
-                ),
-                ft.IconButton(
-                    ft.icons.CHECK,
-                    style=ft.ButtonStyle(elevation=0.1),
-                    bgcolor=ft.colors.SECONDARY_CONTAINER,
-                ),
-            ],
         ),
     )
 
@@ -102,6 +102,7 @@ appbar = ft.AppBar(
     center_title=False,
     bgcolor=ft.colors.SURFACE_VARIANT,
     actions=[
+        ft.IconButton(ft.icons.DARK_MODE_OUTLINED, tooltip="modo"),
         ft.PopupMenuButton(
             tooltip="Opciones",
             items=[ft.PopupMenuItem(icon=ft.icons.DOWNLOAD, text="Descargar Manual")],
@@ -121,9 +122,20 @@ sidebar = ft.Container(
         controls=[
             Compoundcard(),
             Infocard("0°F", var="T°"),
-            Infoinput(),
+            ft.TextField(
+                **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER
+            ),
             Infocard("0%", var="C%"),
-            Infoinput(),
+            ft.TextField(
+                **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER
+            ),
+            ft.Row(
+                controls=[
+                    ft.OutlinedButton(
+                        text="Calcular", icon=ft.icons.CHECK, expand=True, height=30
+                    ),
+                ]
+            ),
         ],
     ),
 )
@@ -200,10 +212,8 @@ chart = ft.BarChart(
 )
 # view
 view_upperpart = ft.Container(
-    padding=ft.Padding(20, 20, 20, 20),
+    **card_style.get("alt"),
     height=150,
-    bgcolor=ft.colors.SECONDARY,
-    border_radius=ft.BorderRadius(10, 10, 10, 10),
     content=ft.Row(
         controls=[
             ft.Column(
@@ -242,19 +252,16 @@ view_lowerpart = ft.Container(
                 expand=True, padding=ft.Padding(10, 10, 10, 10), content=chart
             ),
             ft.Container(
+                **card_style.get("main"),
                 width=200,
-                bgcolor=ft.colors.SURFACE,
-                border_radius=ft.BorderRadius(10, 10, 10, 10),
-                padding=ft.Padding(10, 10, 10, 10),
                 content=ft.Column(
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
                         Infobar(),
                         Infobar(),
                         Infobar(),
                         Infobar(),
                     ],
-                    # alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ),
         ]
@@ -276,7 +283,7 @@ body = ft.Row(controls=[view, sidebar], expand=True)
 def main(page: ft.Page):
     page.title = "FecGraph"
     page.appbar = appbar
-
+    
     page.add(body)
 
 
