@@ -29,8 +29,11 @@ field_style: dict = {
         "text_vertical_align" : ft.VerticalAlignment.START
     }
 }
-
-
+# app class
+class FecGraph(ft.Container()):
+    def __init__(self):
+        pass
+    pass
 # interface
 def Compoundcard():
     return ft.Container(
