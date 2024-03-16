@@ -15,6 +15,15 @@ card_style: dict = {
         "bgcolor": ft.colors.SECONDARY,
     },
 }
+sidebar_style: dict = {
+    "main": {
+        "bgcolor":ft.colors.SURFACE_VARIANT,
+        "width":220,
+        "alignment":ft.alignment.center,
+        "border_radius" :ft.BorderRadius(10, 10, 10, 10),
+        "padding":ft.Padding(left=20, top=30, right=20, bottom=0),
+    }
+}
 field_style: dict = {
     "main": {
         # "height": 30,
@@ -30,10 +39,61 @@ field_style: dict = {
     }
 }
 # app class
-class FecGraph(ft.Container()):
+class FecGraph(ft.Container):
     def __init__(self):
-        pass
-    pass
+        super().__init__(**sidebar_style.get("main"))
+
+        self.t_counter = 0
+        self.p_counter = 0
+
+        self.temperature = InfoCard(val_suf="°F", var_name="T°")
+        self.percentage = InfoCard(val_suf="%", var_name="C%")
+        
+        self.t_input = ft.TextField(
+            **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER                                      
+        )
+        self.p_input = ft.TextField(
+            **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER                                      
+        )
+
+        self.content = ft.Column(
+            scroll = ft.ScrollMode.ADAPTIVE,
+            alignment=ft.MainAxisAlignment.START,
+            horizontal_alignment=ft.VerticalAlignment.CENTER,
+            controls=[
+                Compoundcard(),
+                self.temperature,
+                self.t_input,
+                self.percentage,
+                self.p_input,
+                ft.Row(
+                    controls=[
+                        ft.OutlinedButton(
+                            text="Calcular", 
+                            icon=ft.icons.CHECK, 
+                            expand=True, 
+                            height=30,
+                            on_click= lambda e: self.update_values(e)
+                            ),
+                        ]
+                ),
+            ]
+        )
+
+    def update_values(self, event):
+        if self.t_input != "" and self.t_input.value.isdigit():
+            self.t_counter = self.t_input.value
+            self.temperature.updateValue(self.t_counter)
+            self.t_input.value = ""
+            self.t_input.update()
+
+        if self.p_input != "" and self.p_input.value.isdigit():
+            self.p_counter = self.p_input.value
+            self.percentage.updateValue(self.p_counter)
+            self.p_input.value = ""
+            self.p_input.update()
+            
+
 # interface
 def Compoundcard():
     return ft.Container(
@@ -42,34 +102,43 @@ def Compoundcard():
     )
 
 
-def Infocard(value: str, var=""):
-    return ft.Container(
-        **card_style.get("main"),
-        content=ft.Column(
+class InfoCard(ft.Container):
+    def __init__(self, val_info = 0, val_suf = "", var_name = ""): 
+        super().__init__(**card_style.get("main"))
+
+        self.var_name = var_name
+        self.val_suf = val_suf
+        self.val_info = val_info
+        
+        self.var_text = ft.Text(
+            self.var_name,
+            color=ft.colors.SURFACE_TINT,
+            weight=ft.FontWeight.W_900,
+        )
+        self.val_text = ft.Text(
+            f'{self.val_info}{self.val_suf}',
+            color=ft.colors.SURFACE_TINT,
+            weight=ft.FontWeight.W_700,
+            size=50
+        )
+        self.content=ft.Column(
             controls=[
                 ft.Container(
                     height=20,
-                    content=ft.Text(
-                        var,
-                        color=ft.colors.SURFACE_TINT,
-                        weight=ft.FontWeight.W_900,
-                    ),
+                    content= self.var_text
                 ),
                 ft.Container(
                     bgcolor=ft.colors.SECONDARY_CONTAINER,
                     border_radius=ft.BorderRadius(10, 10, 10, 10),
                     alignment=ft.alignment.center,
-                    content=ft.Text(
-                        value,
-                        color=ft.colors.SURFACE_TINT,
-                        weight=ft.FontWeight.W_700,
-                        size=50,
-                    ),
+                    content=self.val_text,
                 ),
             ]
-        ),
-    )
-
+        )
+    def updateValue(self, new_value):
+        self.val_info = new_value
+        self.val_text.value = f'{self.val_info}{self.val_suf}'
+        self.val_text.update()
 
 def Infobar(value="--", var="None"):
     return ft.Container(
@@ -113,35 +182,7 @@ appbar = ft.AppBar(
     ],
     elevation=1,
 )
-sidebar = ft.Container(
-    bgcolor=ft.colors.SURFACE_VARIANT,
-    width=220,
-    alignment=ft.alignment.center,
-    border_radius=ft.BorderRadius(10, 10, 10, 10),
-    padding=ft.Padding(left=20, top=30, right=20, bottom=0),
-    content=ft.Column(
-        alignment=ft.MainAxisAlignment.START,
-        horizontal_alignment=ft.VerticalAlignment.CENTER,
-        controls=[
-            Compoundcard(),
-            Infocard("0°F", var="T°"),
-            ft.TextField(
-                **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER
-            ),
-            Infocard("0%", var="C%"),
-            ft.TextField(
-                **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER
-            ),
-            ft.Row(
-                controls=[
-                    ft.OutlinedButton(
-                        text="Calcular", icon=ft.icons.CHECK, expand=True, height=30
-                    ),
-                ]
-            ),
-        ],
-    ),
-)
+
 # chart
 chart = ft.BarChart(
     bar_groups=[
@@ -279,7 +320,6 @@ view = ft.Container(
     content=ft.Column(controls=[view_upperpart, view_lowerpart]),
 )
 
-body = ft.Row(controls=[view, sidebar], expand=True)
 
 
 # main
@@ -287,6 +327,9 @@ def main(page: ft.Page):
     page.title = "FecGraph"
     page.appbar = appbar
     
+    fecgraph : ft.Container = FecGraph()
+    body = ft.Row(controls=[view, fecgraph], expand=True)
+
     page.add(body)
 
 
