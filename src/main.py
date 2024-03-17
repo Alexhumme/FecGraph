@@ -241,7 +241,7 @@ chart = ft.BarChart(
     ],
     border=ft.border.all(1, ft.colors.GREY_400),
     left_axis=ft.ChartAxis(
-        labels_size=40, title=ft.Text("Temperatura (grados Farenheig)"), title_size=40
+        labels_size=40, title=ft.Text("Temperatura (grados Fahrenheit)"), title_size=40
     ),
     bottom_axis=ft.ChartAxis(
         labels_size=40, title=ft.Text("Porcentaje de carbono"), title_size=40
