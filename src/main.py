@@ -1,31 +1,27 @@
 import flet as ft
 
 # styles
-card_style: dict = {
-    "main": {
+styles: dict = {
+    "card_main": {
         "padding": ft.Padding(10, 10, 10, 10),
         "margin": ft.Margin(0, 0, 0, 0),
         "border_radius": ft.BorderRadius(10, 10, 10, 10),
         "bgcolor": ft.colors.SURFACE,
     },
-    "alt": {
+    "card_alt": {
         "padding": ft.Padding(20, 20, 20, 20),
         "margin": ft.Margin(0, 0, 0, 0),
         "border_radius": ft.BorderRadius(10, 10, 10, 10),
         "bgcolor": ft.colors.SECONDARY,
     },
-}
-sidebar_style: dict = {
-    "main": {
-        "bgcolor":ft.colors.SURFACE_VARIANT,
-        "width":220,
-        "alignment":ft.alignment.center,
-        "border_radius" :ft.BorderRadius(10, 10, 10, 10),
-        "padding":ft.Padding(left=20, top=30, right=20, bottom=0),
-    }
-}
-field_style: dict = {
-    "main": {
+    "sidebar": {
+        "bgcolor": ft.colors.SURFACE_VARIANT,
+        "width": 220,
+        "alignment": ft.alignment.center,
+        "border_radius": ft.BorderRadius(10, 10, 10, 10),
+        "padding": ft.Padding(left=20, top=30, right=20, bottom=0),
+    },
+    "field": {
         # "height": 30,
         "filled": True,
         "border_radius": ft.BorderRadius(10, 10, 10, 10),
@@ -33,31 +29,54 @@ field_style: dict = {
         "bgcolor": ft.colors.SURFACE,
         "text_style": ft.TextStyle(color=ft.colors.SECONDARY),  # , size=12),
         "text_align": ft.TextAlign.CENTER,
-        "height" : 30, 
-        "text_size" : 12,
-        "text_vertical_align" : ft.VerticalAlignment.START
+        "height": 30,
+        "text_size": 12,
+        "text_vertical_align": ft.VerticalAlignment.START,
+    },
+    "view": {
+        "expand": True,
+        "padding": ft.Padding(20, 20, 20, 20),
+        "border_radius": ft.BorderRadius(10, 10, 10, 10),
+        "bgcolor": ft.colors.SURFACE_VARIANT,
+    },
+}
+chart_styles: dict = {
+    "fec": {
+        "max_y": 110,
+        "interactive": True,
+        "expand": True,
+        "border": ft.border.all(1, ft.colors.GREY_400),
+        "left_axis": ft.ChartAxis(labels_size=50),
+        "bottom_axis": ft.ChartAxis(labels_interval=1, labels_size=40),
+        "horizontal_grid_lines": ft.ChartGridLines(
+            interval=10,
+            color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
+            width=1,
+        ),
     }
 }
+
+
 # app class
-class FecGraph(ft.Container):
+class Sidebar(ft.Container):
     def __init__(self):
-        super().__init__(**sidebar_style.get("main"))
+        super().__init__(**styles.get("sidebar"))
 
         self.t_counter = 0
         self.p_counter = 0
 
         self.temperature = InfoCard(val_suf="°F", var_name="T°")
         self.percentage = InfoCard(val_suf="%", var_name="C%")
-        
+
         self.t_input = ft.TextField(
-            **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER                                      
+            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
         )
         self.p_input = ft.TextField(
-            **field_style.get("main"), keyboard_type=ft.KeyboardType.NUMBER                                      
+            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
         )
 
         self.content = ft.Column(
-            scroll = ft.ScrollMode.ADAPTIVE,
+            scroll=ft.ScrollMode.ADAPTIVE,
             alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.VerticalAlignment.CENTER,
             controls=[
@@ -69,15 +88,15 @@ class FecGraph(ft.Container):
                 ft.Row(
                     controls=[
                         ft.OutlinedButton(
-                            text="Calcular", 
-                            icon=ft.icons.CHECK, 
-                            expand=True, 
+                            text="Calcular",
+                            icon=ft.icons.CHECK,
+                            expand=True,
                             height=30,
-                            on_click= lambda e: self.update_values(e)
-                            ),
-                        ]
+                            on_click=lambda e: self.update_values(e),
+                        ),
+                    ]
                 ),
-            ]
+            ],
         )
 
     def update_values(self, event):
@@ -92,41 +111,38 @@ class FecGraph(ft.Container):
             self.percentage.updateValue(self.p_counter)
             self.p_input.value = ""
             self.p_input.update()
-            
+
 
 # interface
 def Compoundcard():
     return ft.Container(
-        **card_style.get("main"),
+        **styles.get("card_main"),
         height=170,
     )
 
 
 class InfoCard(ft.Container):
-    def __init__(self, val_info = 0, val_suf = "", var_name = ""): 
-        super().__init__(**card_style.get("main"))
+    def __init__(self, val_info=0, val_suf="", var_name=""):
+        super().__init__(**styles.get("card_main"))
 
         self.var_name = var_name
         self.val_suf = val_suf
         self.val_info = val_info
-        
+
         self.var_text = ft.Text(
             self.var_name,
             color=ft.colors.SURFACE_TINT,
             weight=ft.FontWeight.W_900,
         )
         self.val_text = ft.Text(
-            f'{self.val_info}{self.val_suf}',
+            f"{self.val_info}{self.val_suf}",
             color=ft.colors.SURFACE_TINT,
             weight=ft.FontWeight.W_700,
-            size=50
+            size=50,
         )
-        self.content=ft.Column(
+        self.content = ft.Column(
             controls=[
-                ft.Container(
-                    height=20,
-                    content= self.var_text
-                ),
+                ft.Container(height=20, content=self.var_text),
                 ft.Container(
                     bgcolor=ft.colors.SECONDARY_CONTAINER,
                     border_radius=ft.BorderRadius(10, 10, 10, 10),
@@ -135,10 +151,12 @@ class InfoCard(ft.Container):
                 ),
             ]
         )
+
     def updateValue(self, new_value):
         self.val_info = new_value
-        self.val_text.value = f'{self.val_info}{self.val_suf}'
+        self.val_text.value = f"{self.val_info}{self.val_suf}"
         self.val_text.update()
+
 
 def Infobar(value="--", var="None"):
     return ft.Container(
@@ -164,8 +182,6 @@ def Infobar(value="--", var="None"):
     )
 
 
-gridswitch = ft.Switch("Mostrar grilla")
-
 # gui
 appbar = ft.AppBar(
     leading=ft.Icon(ft.icons.ABC),
@@ -183,152 +199,143 @@ appbar = ft.AppBar(
     elevation=1,
 )
 
+
+class PhaseLine(ft.LineChartData):
+    def __init__(self, color, points=[]):
+        super().__init__()
+        self.color = color
+        self.stroke_width = (2,)
+        self.curved = (True,)
+        self.stroke_cap_round = (True,)
+        self.below_line_bgcolor = color
+
+
 # chart
-chart = ft.BarChart(
-    bar_groups=[
-        ft.BarChartGroup(
-            x=0,
-            bar_rods=[
-                ft.BarChartRod(
-                    from_y=0,
-                    to_y=40,
-                    width=40,
-                    color=ft.colors.AMBER,
-                    tooltip="Apple",
-                    border_radius=0,
+class FecChart(ft.LineChart):
+    def __init__(self):
+        super().__init__(**chart_styles.get("fec"))
+
+        self.test_points: list = []
+
+        self.min_x = (
+            int(min(self.points, key=lambda x: x[0][0])) if self.test_points else None
+        )
+        self.max_x = (
+            int(max(self.points, key=lambda x: x[0][0])) if self.test_points else None
+        )
+
+        self.test_line: ft.LineChartData = PhaseLine(color=ft.colors.RED)
+        self.test_line.data_points = self.test_points
+
+        self.data_series = [self.test_line]
+
+    def create_data_points(self, x, y):
+        self.test_points.append(
+            ft.LineChartDataPoint(
+                x,
+                y,
+                selected_below_line=ft.ChartPointLine(
+                    width=0.5, color="green", dash_pattern=[2, 4]
                 ),
-            ],
-        ),
-        ft.BarChartGroup(
-            x=1,
-            bar_rods=[
-                ft.BarChartRod(
-                    from_y=0,
-                    to_y=100,
-                    width=40,
-                    color=ft.colors.BLUE,
-                    tooltip="Blueberry",
-                    border_radius=0,
+                selected_point=ft.ChartCirclePoint(
+                    stroke_width=1, stroke_color="violet"
                 ),
-            ],
-        ),
-        ft.BarChartGroup(
-            x=2,
-            bar_rods=[
-                ft.BarChartRod(
-                    from_y=0,
-                    to_y=30,
-                    width=40,
-                    color=ft.colors.RED,
-                    tooltip="Cherry",
-                    border_radius=0,
-                ),
-            ],
-        ),
-        ft.BarChartGroup(
-            x=3,
-            bar_rods=[
-                ft.BarChartRod(
-                    from_y=0,
-                    to_y=60,
-                    width=40,
-                    color=ft.colors.ORANGE,
-                    tooltip="Orange",
-                    border_radius=0,
-                ),
-            ],
-        ),
-    ],
-    border=ft.border.all(1, ft.colors.GREY_400),
-    left_axis=ft.ChartAxis(
-        labels_size=40, title=ft.Text("Temperatura (grados Fahrenheit)"), title_size=40
-    ),
-    bottom_axis=ft.ChartAxis(
-        labels_size=40, title=ft.Text("Porcentaje de carbono"), title_size=40
-    ),
-    horizontal_grid_lines=ft.ChartGridLines(
-        color=ft.colors.GREY_300, width=1, dash_pattern=[3, 3]
-    ),
-    tooltip_bgcolor=ft.colors.with_opacity(0.5, ft.colors.GREY_300),
-    max_y=110,
-    interactive=True,
-    expand=True,
-)
+            )
+        )
+        self.update()
+
+
 # view
-view_upperpart = ft.Container(
-    **card_style.get("alt"),
-    height=150,
-    content=ft.Row(
-        controls=[
-            ft.Column(
-                expand=True,
-                controls=[
-                    ft.Text(
-                        "Fase",
-                        color=ft.colors.SURFACE,
-                        size=20,
-                        weight=ft.FontWeight.W_900,
-                    ),
-                    ft.Text(
-                        "Descripcion de la Fase Lorem inpsum dalur dolores armin del  galardium merte colorde ajisto.",
-                        color=ft.colors.SURFACE,
-                    ),
-                ],
-            ),
-            ft.Column(
-                expand=True,
-                controls=[
-                    ft.Text("", color=ft.colors.SURFACE),
-                    ft.Text(
-                        "Informacion adicional dalur dolores armin del forsen cancede ilumi tente o mais galardium merte  ajisto.",
-                        color=ft.colors.SURFACE,
-                    ),
-                ],
-            ),
-        ]
-    ),
-)
-view_lowerpart = ft.Container(
-    expand=True,
-    content=ft.Row(
-        controls=[
-            ft.Container(
-                expand=True, padding=ft.Padding(10, 10, 10, 10), content=chart
-            ),
-            ft.Container(
-                **card_style.get("main"),
-                width=200,
-                content=ft.Column(
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+class ViewUpperpart(ft.Container):
+    def __init__(self):
+        super().__init__(**styles.get("card_alt"), height=150)
+
+        self.content = ft.Row(
+            controls=[
+                ft.Column(
+                    expand=True,
                     controls=[
-                        Infobar(),
-                        Infobar(),
-                        Infobar(),
-                        Infobar(),
+                        ft.Text(
+                            "Fase",
+                            color=ft.colors.SURFACE,
+                            size=20,
+                            weight=ft.FontWeight.W_900,
+                        ),
+                        ft.Text(
+                            "Descripcion de la Fase Lorem inpsum dalur dolores armin del  galardium merte colorde ajisto.",
+                            color=ft.colors.SURFACE,
+                        ),
                     ],
                 ),
-            ),
-        ]
-    ),
-)
+                ft.Column(
+                    expand=True,
+                    controls=[
+                        ft.Text("", color=ft.colors.SURFACE),
+                        ft.Text(
+                            "Informacion adicional dalur dolores armin del forsen cancede ilumi tente o mais galardium merte  ajisto.",
+                            color=ft.colors.SURFACE,
+                        ),
+                    ],
+                ),
+            ]
+        )
 
-view = ft.Container(
-    expand=True,
-    padding=ft.Padding(20, 20, 20, 20),
-    border_radius=ft.BorderRadius(10, 10, 10, 10),
-    bgcolor=ft.colors.SURFACE_VARIANT,
-    content=ft.Column(controls=[view_upperpart, view_lowerpart]),
-)
 
+class ViewLowerpart(ft.Container):
+    def __init__(self):
+        super().__init__(expand=True)
+        self.chart: ft.LineChart = FecChart()
+        self.content = ft.Row(
+            controls=[
+                ft.Container(
+                    expand=True, padding=ft.Padding(10, 10, 10, 10), content= self.chart
+                ),
+                ft.Container(
+                    **styles.get("card_main"),
+                    width=200,
+                    content=ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[
+                            Infobar(),
+                            Infobar(),
+                            Infobar(),
+                            Infobar(),
+                        ],
+                    ),
+                ),
+            ]
+        )
+
+
+class View(ft.Container):
+    def __init__(self):
+        super().__init__(**styles.get("view"))
+        view_upperpart: ft.Container = ViewUpperpart()
+        view_lowerpart: ft.Container = ViewLowerpart()
+        self.content = ft.Column(controls=[view_upperpart, view_lowerpart])
+
+    pass
+
+
+class FecGraph(ft.Container):
+    def __init__(self):
+        super().__init__(**styles.get("main"))
+
+        view: ft.Container = View()
+        sidebar: ft.Container = Sidebar()
+        self.content = ft.Row(controls=[view, sidebar], expand=True)
+
+    pass
 
 
 # main
 def main(page: ft.Page):
     page.title = "FecGraph"
     page.appbar = appbar
-    
-    fecgraph : ft.Container = FecGraph()
-    body = ft.Row(controls=[view, fecgraph], expand=True)
+
+    sidebar: ft.Container = Sidebar()
+    view: ft.Container = View()
+    body = ft.Row(controls=[view, sidebar], expand=True)
 
     page.add(body)
 
