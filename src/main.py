@@ -2,6 +2,7 @@ import flet as ft
 
 # styles
 styles: dict = {
+    "main": {"expand": True},
     "card_main": {
         "padding": ft.Padding(10, 10, 10, 10),
         "margin": ft.Margin(0, 0, 0, 0),
@@ -42,75 +43,28 @@ styles: dict = {
 }
 chart_styles: dict = {
     "fec": {
-        "max_y": 110,
+        "max_y": 1600,
+        "min_y": 20,
+        "max_x": 6.67,
+        "min_x": 0,
         "interactive": True,
         "expand": True,
         "border": ft.border.all(1, ft.colors.GREY_400),
-        "left_axis": ft.ChartAxis(labels_size=50),
-        "bottom_axis": ft.ChartAxis(labels_interval=1, labels_size=40),
+        "left_axis": ft.ChartAxis(labels_size=40),
+        "bottom_axis": ft.ChartAxis(labels_size=40),
         "horizontal_grid_lines": ft.ChartGridLines(
-            interval=10,
+            interval=100,
             color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
             width=1,
+            dash_pattern=[2],
+        ),
+        "vertical_grid_lines": ft.ChartGridLines(
+            interval=1,
+            color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
+            dash_pattern=[2],
         ),
     }
 }
-
-
-# app class
-class Sidebar(ft.Container):
-    def __init__(self):
-        super().__init__(**styles.get("sidebar"))
-
-        self.t_counter = 0
-        self.p_counter = 0
-
-        self.temperature = InfoCard(val_suf="°F", var_name="T°")
-        self.percentage = InfoCard(val_suf="%", var_name="C%")
-
-        self.t_input = ft.TextField(
-            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
-        )
-        self.p_input = ft.TextField(
-            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
-        )
-
-        self.content = ft.Column(
-            scroll=ft.ScrollMode.ADAPTIVE,
-            alignment=ft.MainAxisAlignment.START,
-            horizontal_alignment=ft.VerticalAlignment.CENTER,
-            controls=[
-                Compoundcard(),
-                self.temperature,
-                self.t_input,
-                self.percentage,
-                self.p_input,
-                ft.Row(
-                    controls=[
-                        ft.OutlinedButton(
-                            text="Calcular",
-                            icon=ft.icons.CHECK,
-                            expand=True,
-                            height=30,
-                            on_click=lambda e: self.update_values(e),
-                        ),
-                    ]
-                ),
-            ],
-        )
-
-    def update_values(self, event):
-        if self.t_input != "" and self.t_input.value.isdigit():
-            self.t_counter = self.t_input.value
-            self.temperature.updateValue(self.t_counter)
-            self.t_input.value = ""
-            self.t_input.update()
-
-        if self.p_input != "" and self.p_input.value.isdigit():
-            self.p_counter = self.p_input.value
-            self.percentage.updateValue(self.p_counter)
-            self.p_input.value = ""
-            self.p_input.update()
 
 
 # interface
@@ -205,8 +159,8 @@ class PhaseLine(ft.LineChartData):
         super().__init__()
         self.color = color
         self.stroke_width = (2,)
-        self.curved = (True,)
-        self.stroke_cap_round = (True,)
+        self.curved = (True,True)
+        self.stroke_cap_round = (True,True)
         self.below_line_bgcolor = color
 
 
@@ -217,28 +171,21 @@ class FecChart(ft.LineChart):
 
         self.test_points: list = []
 
-        self.min_x = (
-            int(min(self.points, key=lambda x: x[0][0])) if self.test_points else None
-        )
-        self.max_x = (
-            int(max(self.points, key=lambda x: x[0][0])) if self.test_points else None
-        )
-
         self.test_line: ft.LineChartData = PhaseLine(color=ft.colors.RED)
         self.test_line.data_points = self.test_points
 
         self.data_series = [self.test_line]
 
-    def create_data_points(self, x, y):
+    def create_data_point(self, x, y):
         self.test_points.append(
             ft.LineChartDataPoint(
                 x,
                 y,
                 selected_below_line=ft.ChartPointLine(
-                    width=0.5, color="green", dash_pattern=[2, 4]
+                    width=5, color="green", dash_pattern=[2, 4]
                 ),
                 selected_point=ft.ChartCirclePoint(
-                    stroke_width=1, stroke_color="violet"
+                    stroke_width=10, stroke_color="violet"
                 ),
             )
         )
@@ -284,11 +231,11 @@ class ViewUpperpart(ft.Container):
 class ViewLowerpart(ft.Container):
     def __init__(self):
         super().__init__(expand=True)
-        self.chart: ft.LineChart = FecChart()
+        self.chart: FecChart = FecChart()
         self.content = ft.Row(
             controls=[
                 ft.Container(
-                    expand=True, padding=ft.Padding(10, 10, 10, 10), content= self.chart
+                    expand=True, padding=ft.Padding(10, 10, 10, 10), content=self.chart
                 ),
                 ft.Container(
                     **styles.get("card_main"),
@@ -310,20 +257,84 @@ class ViewLowerpart(ft.Container):
 class View(ft.Container):
     def __init__(self):
         super().__init__(**styles.get("view"))
-        view_upperpart: ft.Container = ViewUpperpart()
-        view_lowerpart: ft.Container = ViewLowerpart()
-        self.content = ft.Column(controls=[view_upperpart, view_lowerpart])
+        self.upperpart: ViewUpperpart = ViewUpperpart()
+        self.lowerpart: ViewLowerpart = ViewLowerpart()
+        self.content = ft.Column(controls=[self.upperpart, self.lowerpart])
 
     pass
 
 
-class FecGraph(ft.Container):
+class Sidebar(ft.Container):
     def __init__(self):
-        super().__init__(**styles.get("main"))
+        super().__init__(**styles.get("sidebar"))
 
-        view: ft.Container = View()
-        sidebar: ft.Container = Sidebar()
-        self.content = ft.Row(controls=[view, sidebar], expand=True)
+        self.temperature = InfoCard(val_suf="°F", var_name="T°")
+        self.percentage = InfoCard(val_suf="%", var_name="C%")
+
+        self.t_input = ft.TextField(
+            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
+        )
+        self.p_input = ft.TextField(
+            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
+        )
+        self.act_btn = ft.OutlinedButton(
+            text="Calcular",
+            icon=ft.icons.CHECK,
+            expand=True,
+            height=30,
+        )
+
+        self.content = ft.Column(
+            scroll=ft.ScrollMode.ADAPTIVE,
+            alignment=ft.MainAxisAlignment.START,
+            horizontal_alignment=ft.VerticalAlignment.CENTER,
+            controls=[
+                Compoundcard(),
+                self.temperature,
+                self.t_input,
+                self.percentage,
+                self.p_input,
+                ft.Row(controls=[self.act_btn]),
+            ],
+        )
+
+
+class FecGraph(ft.Container):
+    def __init__(self, view: View, sidebar: Sidebar):
+
+        self.t_counter = 0
+        self.p_counter = 0
+
+        self.view: View = view
+        self.sidebar: Sidebar = sidebar
+
+        self.sidebar.act_btn.on_click = lambda e: self.update_values(e)
+        super().__init__(
+            **styles.get("main"),
+            content=ft.Row(controls=[self.view, self.sidebar], expand=True),
+        )
+
+    def update_values(self, event):
+        
+        t_delta: str = self.sidebar.t_input.value
+        p_delta: str = self.sidebar.p_input.value
+        if  t_delta != "" and t_delta.isdigit() and float(t_delta) <= 1600 and float(t_delta) >= 20:
+            self.t_counter = t_delta
+            self.sidebar.temperature.updateValue(self.t_counter)
+            self.sidebar.t_input.value = ""
+            self.sidebar.t_input.update()
+
+        if p_delta != "" and p_delta.isdigit() and float(p_delta) <= 6.67 and float(p_delta) >= 0:
+            self.p_counter = p_delta
+            self.sidebar.percentage.updateValue(self.p_counter)
+            self.sidebar.p_input.value = ""
+            self.sidebar.p_input.update()
+
+        if self.t_counter or self.p_counter:
+            self.view.lowerpart.chart.create_data_point(
+                x = self.p_counter,
+                y = self.t_counter
+            )
 
     pass
 
@@ -333,11 +344,11 @@ def main(page: ft.Page):
     page.title = "FecGraph"
     page.appbar = appbar
 
-    sidebar: ft.Container = Sidebar()
     view: ft.Container = View()
-    body = ft.Row(controls=[view, sidebar], expand=True)
+    sidebar: ft.Container = Sidebar()
+    app: ft.Container = FecGraph(view=view, sidebar=sidebar)
 
-    page.add(body)
+    page.add(app)
 
 
 ft.app(target=main)
