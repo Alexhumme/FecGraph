@@ -41,6 +41,7 @@ styles: dict = {
         "bgcolor": ft.colors.SURFACE_VARIANT,
     },
 }
+
 chart_styles: dict = {
     "fec": {
         "max_y": 1600,
@@ -152,16 +153,77 @@ appbar = ft.AppBar(
     ],
     elevation=1,
 )
+# phases
+phases: list = [
+    {
+        "name": "Austenita",
+        "symbol": "y",
+        "crystal": "",
+        "description": "En este estado, los aceros son maleabes y faciles de manipular, las altas temperaturas ayudan a su uso.",
+        "properties": {"p1": "Dúctil", "Rigidez": "Blanda", "p3": "Tenaz"},
+        "line": [(0, 1390), (0.3, 1450), (2.11, 1147), (0.8, 723), (0, 900)],
+        "line_properties": {
+            "color": ft.colors.RED,
+        },
+    },
+    {
+        "name": "Ferrita",
+        "symbol": "a",
+        "crystal": "",
+        "description": "Es a fase mas banda que aparece a temperatura abiente, ,lo que la hace muy importante a pesar de su poca cantidad.",
+        "properties": {"solubilidad": "0.02%", "Rigidez": "Blanda"},
+        "line": [(0, 900), (0.15, 780), (0.2, 723), (0.15, 700), (0, 0)],
+        "line_properties": {
+            "color": ft.colors.BLUE_100,
+        },
+    },
+    {
+        "name": "Cementita",
+        "symbol": "Fe3C",
+        "crystal": "",
+        "description": "Compuesto intermetalico no apropiado para procesos de deformacion plastico",
+        "properties": {"Dureza": "Duro", "Rigidez": "Fragil"},
+        "line": [(0.2, 723), (6.67, 723), (6.67, 0)],
+        "line_properties": {
+            "color": ft.colors.GREEN_400,
+        },
+    },
+    {
+        "name": "Perlita",
+        "symbol": "a + Fe3C",
+        "crystal": "",
+        "description": "Se forma por la minas alternas de ferrita y cementita a menos de 723°C, posee posee propiedades de ambos.",
+        "properties": {"Resistencia": "Alta"},
+        "line": [(0.8, 723), (0.8, 0)],
+        "line_properties": {"color": ft.colors.YELLOW_200, "dash_pattern": [5, 5]},
+    },
+]
 
 
 class PhaseLine(ft.LineChartData):
-    def __init__(self, color, points=[]):
+    def __init__(self, phaseData: dict):
         super().__init__()
-        self.color = color
         self.stroke_width = (2,)
-        self.curved = (True,True)
-        self.stroke_cap_round = (True,True)
-        self.below_line_bgcolor = color
+        self.curved = (True, True)
+        # self.stroke_cap_round = (True,True)
+        self.phase_data = phaseData
+        self.color = self.phase_data["line_properties"]["color"]
+        self.data_points = self.convert_to_chart_data(self.phase_data["line"])
+
+    def convert_to_chart_data(
+        self, line_data: list[tuple[float, float]]
+    ) -> list[ft.LineChartDataPoint]:
+        chart_data_points = []
+        for point in line_data:
+            x, y = point
+            data_point = ft.LineChartDataPoint(
+                x=x, y=y, show_tooltip=True, tooltip=self.phase_data["name"]
+            )
+            chart_data_points.append(data_point)
+        return chart_data_points
+
+
+phase_lines: list = [PhaseLine(phaseData=phase_data) for phase_data in phases]
 
 
 # chart
@@ -169,26 +231,10 @@ class FecChart(ft.LineChart):
     def __init__(self):
         super().__init__(**chart_styles.get("fec"))
 
-        self.test_points: list = []
-
-        self.test_line: ft.LineChartData = PhaseLine(color=ft.colors.RED)
-        self.test_line.data_points = self.test_points
-
-        self.data_series = [self.test_line]
+        self.data_series = phase_lines
 
     def create_data_point(self, x, y):
-        self.test_points.append(
-            ft.LineChartDataPoint(
-                x,
-                y,
-                selected_below_line=ft.ChartPointLine(
-                    width=5, color="green", dash_pattern=[2, 4]
-                ),
-                selected_point=ft.ChartCirclePoint(
-                    stroke_width=10, stroke_color="violet"
-                ),
-            )
-        )
+        self.test_points.append(ft.LineChartDataPoint(x, y))
         self.update()
 
 
@@ -302,6 +348,8 @@ class Sidebar(ft.Container):
 class FecGraph(ft.Container):
     def __init__(self, view: View, sidebar: Sidebar):
 
+        self.phases = phases
+
         self.t_counter = 0
         self.p_counter = 0
 
@@ -309,32 +357,45 @@ class FecGraph(ft.Container):
         self.sidebar: Sidebar = sidebar
 
         self.sidebar.act_btn.on_click = lambda e: self.update_values(e)
+
+        self.view.lowerpart.phases = self.phases
+        self.view.uppetpart.phases = self.phases
+        self.sidebar.phases = self.phases
+        self.view.phases = self.phases
+
         super().__init__(
             **styles.get("main"),
             content=ft.Row(controls=[self.view, self.sidebar], expand=True),
         )
 
     def update_values(self, event):
-        
+
         t_delta: str = self.sidebar.t_input.value
         p_delta: str = self.sidebar.p_input.value
-        if  t_delta != "" and t_delta.isdigit() and float(t_delta) <= 1600 and float(t_delta) >= 20:
+        if (
+            t_delta != ""
+            and t_delta.isdigit()
+            and float(t_delta) <= 1600
+            and float(t_delta) >= 20
+        ):
             self.t_counter = t_delta
             self.sidebar.temperature.updateValue(self.t_counter)
             self.sidebar.t_input.value = ""
             self.sidebar.t_input.update()
 
-        if p_delta != "" and p_delta.isdigit() and float(p_delta) <= 6.67 and float(p_delta) >= 0:
+        if (
+            p_delta != ""
+            and p_delta.isdigit()
+            and float(p_delta) <= 6.67
+            and float(p_delta) >= 0
+        ):
             self.p_counter = p_delta
             self.sidebar.percentage.updateValue(self.p_counter)
             self.sidebar.p_input.value = ""
             self.sidebar.p_input.update()
 
         if self.t_counter or self.p_counter:
-            self.view.lowerpart.chart.create_data_point(
-                x = self.p_counter,
-                y = self.t_counter
-            )
+            pass
 
     pass
 
