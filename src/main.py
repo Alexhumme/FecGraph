@@ -1,6 +1,8 @@
+# importaciones
+from utils.get_phase import main as get_phase
 import flet as ft
 
-# styles
+# Dicionario de estilos de los componentes
 styles: dict = {
     "main": {"expand": True},
     "card_main": {
@@ -23,16 +25,7 @@ styles: dict = {
         "padding": ft.Padding(left=20, top=30, right=20, bottom=0),
     },
     "field": {
-        # "height": 30,
-        "filled": True,
-        "border_radius": ft.BorderRadius(10, 10, 10, 10),
-        "border_color": ft.colors.TRANSPARENT,
-        "bgcolor": ft.colors.SURFACE,
-        "text_style": ft.TextStyle(color=ft.colors.SECONDARY),  # , size=12),
-        "text_align": ft.TextAlign.CENTER,
         "height": 30,
-        "text_size": 12,
-        "text_vertical_align": ft.VerticalAlignment.START,
     },
     "view": {
         "expand": True,
@@ -68,15 +61,30 @@ chart_styles: dict = {
 }
 
 
-# interface
-def Compoundcard():
-    return ft.Container(
-        **styles.get("card_main"),
-        height=170,
-    )
+# Componentes que pertenecen a la interface de la aplicacion
+# gui
+appbar = ft.AppBar(
+    leading=ft.Icon(ft.icons.ABC),
+    leading_width=40,
+    title=ft.Text("FecGraph"),
+    center_title=False,
+    bgcolor=ft.colors.SURFACE_VARIANT,
+    actions=[
+        ft.IconButton(ft.icons.DARK_MODE_OUTLINED, tooltip="modo"),
+        ft.PopupMenuButton(
+            tooltip="Opciones",
+            items=[ft.PopupMenuItem(icon=ft.icons.DOWNLOAD, text="Descargar Manual")],
+        ),
+    ],
+    elevation=1,
+)
 
 
-class InfoCard(ft.Container):
+def Compoundcard():  # tarjeta superior de la barra derecha, muestra la estructura crristalina del compuesto
+    return ft.Container(**styles.get("card_main"), height=170)
+
+
+class InfoCard(ft.Container):  # musetra informacion de una variable en la barra lateral
     def __init__(self, val_info=0, val_suf="", var_name=""):
         super().__init__(**styles.get("card_main"))
 
@@ -84,17 +92,18 @@ class InfoCard(ft.Container):
         self.val_suf = val_suf
         self.val_info = val_info
 
-        self.var_text = ft.Text(
+        self.var_text = ft.Text(  # variable en la esquina izquiera
             self.var_name,
             color=ft.colors.SURFACE_TINT,
             weight=ft.FontWeight.W_900,
         )
-        self.val_text = ft.Text(
+        self.val_text = ft.Text(  # valor actual en el centro
             f"{self.val_info}{self.val_suf}",
             color=ft.colors.SURFACE_TINT,
             weight=ft.FontWeight.W_700,
             size=50,
         )
+
         self.content = ft.Column(
             controls=[
                 ft.Container(height=20, content=self.var_text),
@@ -107,13 +116,15 @@ class InfoCard(ft.Container):
             ]
         )
 
-    def updateValue(self, new_value):
+    def updateValue(self, new_value):  # actualizar valor, recibe un valor y lo añade
         self.val_info = new_value
         self.val_text.value = f"{self.val_info}{self.val_suf}"
         self.val_text.update()
 
 
-def Infobar(value="--", var="None"):
+def Infobar(
+    var="None", value="--"
+):  # barras al derecho del grafico, muestran informacion de la seleccion actual
     return ft.Container(
         bgcolor=ft.colors.SURFACE_VARIANT,
         border_radius=ft.BorderRadius(10, 10, 10, 10),
@@ -137,23 +148,7 @@ def Infobar(value="--", var="None"):
     )
 
 
-# gui
-appbar = ft.AppBar(
-    leading=ft.Icon(ft.icons.ABC),
-    leading_width=40,
-    title=ft.Text("FecGraph"),
-    center_title=False,
-    bgcolor=ft.colors.SURFACE_VARIANT,
-    actions=[
-        ft.IconButton(ft.icons.DARK_MODE_OUTLINED, tooltip="modo"),
-        ft.PopupMenuButton(
-            tooltip="Opciones",
-            items=[ft.PopupMenuItem(icon=ft.icons.DOWNLOAD, text="Descargar Manual")],
-        ),
-    ],
-    elevation=1,
-)
-# phases
+# phases: Listado de informacion sobre cada fase
 phases: list = [
     {
         "name": "Austenita",
@@ -172,7 +167,7 @@ phases: list = [
         "crystal": "",
         "description": "Es a fase mas banda que aparece a temperatura abiente, ,lo que la hace muy importante a pesar de su poca cantidad.",
         "properties": {"solubilidad": "0.02%", "Rigidez": "Blanda"},
-        "line": [(0, 900), (0.15, 780), (0.2, 723), (0.15, 700), (0, 0)],
+        "line": [(0, 900), (0.15, 780), (0.2, 723), (0.15, 630), (0, 0)],
         "line_properties": {
             "color": ft.colors.BLUE_100,
         },
@@ -205,7 +200,6 @@ class PhaseLine(ft.LineChartData):
         super().__init__()
         self.stroke_width = (2,)
         self.curved = (True, True)
-        # self.stroke_cap_round = (True,True)
         self.phase_data = phaseData
         self.color = self.phase_data["line_properties"]["color"]
         self.data_points = self.convert_to_chart_data(self.phase_data["line"])
@@ -314,20 +308,25 @@ class Sidebar(ft.Container):
     def __init__(self):
         super().__init__(**styles.get("sidebar"))
 
-        self.temperature = InfoCard(val_suf="°F", var_name="T°")
+        self.temperature = InfoCard(val_info=20, val_suf="°F", var_name="T°")
         self.percentage = InfoCard(val_suf="%", var_name="C%")
 
-        self.t_input = ft.TextField(
-            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
+        self.t_input = ft.Slider(
+            **styles.get("field"),
+            min=20,
+            max=1600,
+            divisions=15,
+            label="{value}°F",
+            value=20,
+            round=1,
         )
-        self.p_input = ft.TextField(
-            **styles.get("field"), keyboard_type=ft.KeyboardType.NUMBER
-        )
-        self.act_btn = ft.OutlinedButton(
-            text="Calcular",
-            icon=ft.icons.CHECK,
-            expand=True,
-            height=30,
+        self.p_input = ft.Slider(
+            **styles.get("field"),
+            min=0,
+            max=6.67,
+            divisions=6,
+            label="{value}%",
+            value=0,
         )
 
         self.content = ft.Column(
@@ -340,7 +339,6 @@ class Sidebar(ft.Container):
                 self.t_input,
                 self.percentage,
                 self.p_input,
-                ft.Row(controls=[self.act_btn]),
             ],
         )
 
@@ -356,10 +354,11 @@ class FecGraph(ft.Container):
         self.view: View = view
         self.sidebar: Sidebar = sidebar
 
-        self.sidebar.act_btn.on_click = lambda e: self.update_values(e)
+        self.sidebar.t_input.on_change_end = lambda e: self.update_values(e)
+        self.sidebar.p_input.on_change_end = lambda e: self.update_values(e)
 
         self.view.lowerpart.phases = self.phases
-        self.view.uppetpart.phases = self.phases
+        self.view.upperpart.phases = self.phases
         self.sidebar.phases = self.phases
         self.view.phases = self.phases
 
@@ -372,30 +371,16 @@ class FecGraph(ft.Container):
 
         t_delta: str = self.sidebar.t_input.value
         p_delta: str = self.sidebar.p_input.value
-        if (
-            t_delta != ""
-            and t_delta.isdigit()
-            and float(t_delta) <= 1600
-            and float(t_delta) >= 20
-        ):
+
+        if t_delta <= 1600 and t_delta >= 20:
             self.t_counter = t_delta
-            self.sidebar.temperature.updateValue(self.t_counter)
-            self.sidebar.t_input.value = ""
-            self.sidebar.t_input.update()
+            self.sidebar.temperature.updateValue("%.0f" % self.t_counter)
 
-        if (
-            p_delta != ""
-            and p_delta.isdigit()
-            and float(p_delta) <= 6.67
-            and float(p_delta) >= 0
-        ):
+        if p_delta <= 6.67 and p_delta >= 0:
             self.p_counter = p_delta
-            self.sidebar.percentage.updateValue(self.p_counter)
-            self.sidebar.p_input.value = ""
-            self.sidebar.p_input.update()
+            self.sidebar.percentage.updateValue("%.1f" % self.p_counter)
 
-        if self.t_counter or self.p_counter:
-            pass
+        print(p_delta, t_delta, get_phase(p_delta, t_delta))
 
     pass
 
