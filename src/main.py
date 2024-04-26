@@ -1,74 +1,13 @@
 # importaciones
 from utils.get_phase import main as get_phase
+import utils.styles as styles
 import flet as ft
-
-# Dicionario de estilos de los componentes
-styles: dict = {
-    "main": {"expand": True},
-    "card_main": {
-        "padding": ft.Padding(10, 10, 10, 10),
-        "margin": ft.Margin(0, 0, 0, 0),
-        "border_radius": ft.BorderRadius(10, 10, 10, 10),
-        "bgcolor": ft.colors.SURFACE,
-    },
-    "card_alt": {
-        "padding": ft.Padding(20, 20, 20, 20),
-        "margin": ft.Margin(0, 0, 0, 0),
-        "border_radius": ft.BorderRadius(10, 10, 10, 10),
-        "bgcolor": ft.colors.SECONDARY,
-    },
-    "sidebar": {
-        "bgcolor": ft.colors.SURFACE_VARIANT,
-        "width": 220,
-        "alignment": ft.alignment.center,
-        "border_radius": ft.BorderRadius(10, 10, 10, 10),
-        "padding": ft.Padding(left=20, top=30, right=20, bottom=0),
-    },
-    "field": {
-        "height": 30,
-    },
-    "view": {
-        "expand": True,
-        "padding": ft.Padding(20, 20, 20, 20),
-        "border_radius": ft.BorderRadius(10, 10, 10, 10),
-        "bgcolor": ft.colors.SURFACE_VARIANT,
-    },
-}
-
-chart_styles: dict = {
-    "fec": {
-        "max_y": 1600,
-        "min_y": 20,
-        "max_x": 6.67,
-        "min_x": 0,
-        "interactive": True,
-        "expand": True,
-        "border": ft.border.all(1, ft.colors.GREY_400),
-        "left_axis": ft.ChartAxis(labels_size=40),
-        "bottom_axis": ft.ChartAxis(labels_size=40),
-        "horizontal_grid_lines": ft.ChartGridLines(
-            interval=100,
-            color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
-            width=1,
-            dash_pattern=[2],
-        ),
-        "vertical_grid_lines": ft.ChartGridLines(
-            interval=1,
-            color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
-            dash_pattern=[2],
-        ),
-    }
-}
-
 
 # Componentes que pertenecen a la interface de la aplicacion
 # gui
 appbar = ft.AppBar(
-    leading=ft.Icon(ft.icons.ABC),
-    leading_width=40,
+    **styles.interface.get("appbar"),
     title=ft.Text("FecGraph"),
-    center_title=False,
-    bgcolor=ft.colors.SURFACE_VARIANT,
     actions=[
         ft.IconButton(ft.icons.DARK_MODE_OUTLINED, tooltip="modo"),
         ft.PopupMenuButton(
@@ -76,17 +15,18 @@ appbar = ft.AppBar(
             items=[ft.PopupMenuItem(icon=ft.icons.DOWNLOAD, text="Descargar Manual")],
         ),
     ],
-    elevation=1,
 )
 
 
-def Compoundcard():  # tarjeta superior de la barra derecha, muestra la estructura crristalina del compuesto
-    return ft.Container(**styles.get("card_main"), height=170)
+class Compoundcard(ft.Container):  # tarjeta superior de la barra derecha, muestra la estructura crristalina del compuesto
+    def __init__(self):
+        super().__init__(**styles.interface.get("card_main"), height=170)
+        pass
 
 
 class InfoCard(ft.Container):  # musetra informacion de una variable en la barra lateral
     def __init__(self, val_info=0, val_suf="", var_name=""):
-        super().__init__(**styles.get("card_main"))
+        super().__init__(**styles.interface.get("card_main"))
 
         self.var_name = var_name
         self.val_suf = val_suf
@@ -101,7 +41,7 @@ class InfoCard(ft.Container):  # musetra informacion de una variable en la barra
             f"{self.val_info}{self.val_suf}",
             color=ft.colors.SURFACE_TINT,
             weight=ft.FontWeight.W_700,
-            size=50,
+            size=45,
         )
 
         self.content = ft.Column(
@@ -122,13 +62,12 @@ class InfoCard(ft.Container):  # musetra informacion de una variable en la barra
         self.val_text.update()
 
 
-def Infobar(
-    var="None", value="--"
+class InfoSnack(
+    ft.Container
 ):  # barras al derecho del grafico, muestran informacion de la seleccion actual
-    return ft.Container(
-        bgcolor=ft.colors.SURFACE_VARIANT,
-        border_radius=ft.BorderRadius(10, 10, 10, 10),
-        content=ft.Row(
+    def __init__(self, var="None", value="--"):
+        super().__init__(**styles.interface.get("infosnack"))
+        self.content = ft.Row(
             controls=[
                 ft.Container(
                     padding=ft.Padding(20, 10, 0, 10),
@@ -144,8 +83,7 @@ def Infobar(
                     content=ft.Text(value, color=ft.colors.SURFACE_TINT),
                 ),
             ]
-        ),
-    )
+        )
 
 
 # phases: Listado de informacion sobre cada fase
@@ -155,42 +93,49 @@ phases: list = [
         "symbol": "y",
         "crystal": "",
         "description": "En este estado, los aceros son maleabes y faciles de manipular, las altas temperaturas ayudan a su uso.",
-        "properties": {"p1": "Dúctil", "Rigidez": "Blanda", "p3": "Tenaz"},
+        "properties": [
+            {"val": "Dúctil"},
+            {"name": "Rigidez", "val": "Blanda"},
+            {"val": "Tenaz"},
+        ],
         "line": [(0, 1390), (0.3, 1450), (2.11, 1147), (0.8, 723), (0, 900)],
-        "line_properties": {
-            "color": ft.colors.RED,
-        },
+        "line_properties": {"color": ft.colors.RED},
     },
     {
         "name": "Ferrita",
         "symbol": "a",
         "crystal": "",
         "description": "Es a fase mas banda que aparece a temperatura abiente, ,lo que la hace muy importante a pesar de su poca cantidad.",
-        "properties": {"solubilidad": "0.02%", "Rigidez": "Blanda"},
+        "properties": [
+            {"name": "solubilidad", "val": "0.02%"},
+            {"name": "Rigidez", "val": "Blanda"},
+        ],
         "line": [(0, 900), (0.15, 780), (0.2, 723), (0.15, 630), (0, 0)],
-        "line_properties": {
-            "color": ft.colors.BLUE_100,
-        },
+        "line_properties": {"color": ft.colors.BLUE_100},
     },
     {
         "name": "Cementita",
         "symbol": "Fe3C",
         "crystal": "",
         "description": "Compuesto intermetalico no apropiado para procesos de deformacion plastico",
-        "properties": {"Dureza": "Duro", "Rigidez": "Fragil"},
+        "properties": [
+            {"name": "Dureza", "val": "Duro"},
+            {"name": "Rigidez", "val": "Fragil"},
+        ],
         "line": [(0.2, 723), (6.67, 723), (6.67, 0)],
-        "line_properties": {
-            "color": ft.colors.GREEN_400,
-        },
+        "line_properties": {"color": ft.colors.GREEN_400},
     },
     {
         "name": "Perlita",
         "symbol": "a + Fe3C",
         "crystal": "",
         "description": "Se forma por la minas alternas de ferrita y cementita a menos de 723°C, posee posee propiedades de ambos.",
-        "properties": {"Resistencia": "Alta"},
+        "properties": [{"name": "Resistencia", "val": "Alta"}],
         "line": [(0.8, 723), (0.8, 0)],
         "line_properties": {"color": ft.colors.YELLOW_200, "dash_pattern": [5, 5]},
+    },
+    {
+        "name": "Liquido",
     },
 ]
 
@@ -217,13 +162,17 @@ class PhaseLine(ft.LineChartData):
         return chart_data_points
 
 
-phase_lines: list = [PhaseLine(phaseData=phase_data) for phase_data in phases]
+phase_lines: list = [
+    PhaseLine(phaseData=phase_data)
+    for phase_data in phases
+    if phase_data.get("line_properties")
+]
 
 
 # chart
 class FecChart(ft.LineChart):
     def __init__(self):
-        super().__init__(**chart_styles.get("fec"))
+        super().__init__(**styles.chart_styles.get("fec"))
 
         self.data_series = phase_lines
 
@@ -233,70 +182,69 @@ class FecChart(ft.LineChart):
 
 
 # view
-class ViewUpperpart(ft.Container):
+class ViewUpperpart(ft.Tabs):
     def __init__(self):
-        super().__init__(**styles.get("card_alt"), height=150)
+        super().__init__(height=200)
 
-        self.content = ft.Row(
-            controls=[
-                ft.Column(
-                    expand=True,
-                    controls=[
-                        ft.Text(
-                            "Fase",
-                            color=ft.colors.SURFACE,
-                            size=20,
-                            weight=ft.FontWeight.W_900,
-                        ),
-                        ft.Text(
-                            "Descripcion de la Fase Lorem inpsum dalur dolores armin del  galardium merte colorde ajisto.",
-                            color=ft.colors.SURFACE,
-                        ),
-                    ],
+        self.container = ft.Container(**styles.interface.get("panel"))
+        self.tabs = [ft.Tab(content=self.container)]
+
+    def updateInfo(self, data):
+        self.data = data
+        self.tabs = self._build_tabs()
+        self.update()
+
+    def _build_tabs(self):
+        return [
+            ft.Tab(
+                text=self._format_tab_text(item),
+                content=ft.Container(
+                    **styles.interface.get("panel"),
+                    content=ft.Text(
+                        self._get_phase_description(item["name"]),
+                        color=ft.colors.SURFACE,
+                    ),
                 ),
-                ft.Column(
-                    expand=True,
-                    controls=[
-                        ft.Text("", color=ft.colors.SURFACE),
-                        ft.Text(
-                            "Informacion adicional dalur dolores armin del forsen cancede ilumi tente o mais galardium merte  ajisto.",
-                            color=ft.colors.SURFACE,
-                        ),
-                    ],
-                ),
-            ]
-        )
+            )
+            for item in self.data
+        ]
+
+    def _format_tab_text(self, item):
+        pure_text = 'pura' if item.get('pure') else ''
+        num_text = str(item.get('num') or '')
+        porc_text = '%.1f' % (item.get('porc') or 0)
+        return f"{item['name']} {pure_text} {num_text} ({porc_text})%"
+
+    def _get_phase_description(self, phase_name):
+        return next(
+            filter(lambda phase: phase.get("name") == phase_name, self.phases),
+            {}
+        ).get("description")
+
 
 
 class ViewLowerpart(ft.Container):
     def __init__(self):
         super().__init__(expand=True)
-        self.chart: FecChart = FecChart()
+        self.chart = FecChart()
+        self.props_list_view = ft.Column(horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         self.content = ft.Row(
             controls=[
-                ft.Container(
-                    expand=True, padding=ft.Padding(10, 10, 10, 10), content=self.chart
-                ),
-                ft.Container(
-                    **styles.get("card_main"),
-                    width=200,
-                    content=ft.Column(
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        controls=[
-                            Infobar(),
-                            Infobar(),
-                            Infobar(),
-                            Infobar(),
-                        ],
-                    ),
-                ),
+                ft.Container(expand=True, padding=ft.Padding(10, 10, 10, 10), content=self.chart),
+                ft.Container(**styles.interface.get("card_main"), width=220, content=self.props_list_view),
             ]
         )
+
+    def updateProperties(self, data):
+        info_snacks = [InfoSnack(prop.get("name"), prop.get("val")) for prop in data]
+        self.props_list_view.controls.clear()
+        self.props_list_view.controls.extend(info_snacks)
+        self.props_list_view.update()
 
 
 class View(ft.Container):
     def __init__(self):
-        super().__init__(**styles.get("view"))
+        super().__init__(**styles.interface.get("view"))
         self.upperpart: ViewUpperpart = ViewUpperpart()
         self.lowerpart: ViewLowerpart = ViewLowerpart()
         self.content = ft.Column(controls=[self.upperpart, self.lowerpart])
@@ -306,41 +254,32 @@ class View(ft.Container):
 
 class Sidebar(ft.Container):
     def __init__(self):
-        super().__init__(**styles.get("sidebar"))
+        super().__init__(**styles.interface.get("sidebar"))
+
+        self.phase_card = Compoundcard()
 
         self.temperature = InfoCard(val_info=20, val_suf="°F", var_name="T°")
         self.percentage = InfoCard(val_suf="%", var_name="C%")
 
-        self.t_input = ft.Slider(
-            **styles.get("field"),
-            min=20,
-            max=1600,
-            divisions=15,
-            label="{value}°F",
-            value=20,
-            round=1,
-        )
-        self.p_input = ft.Slider(
-            **styles.get("field"),
-            min=0,
-            max=6.67,
-            divisions=6,
-            label="{value}%",
-            value=0,
-        )
+        self.t_input = ft.Slider(**styles.interface.get("field_t"), label="{value}°F")
+        self.p_input = ft.Slider(**styles.interface.get("field_p"), label="{value}%")
 
         self.content = ft.Column(
             scroll=ft.ScrollMode.ADAPTIVE,
             alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.VerticalAlignment.CENTER,
             controls=[
-                Compoundcard(),
+                self.phase_card,
                 self.temperature,
                 self.t_input,
                 self.percentage,
                 self.p_input,
             ],
         )
+    
+    def set_image():
+        
+        pass
 
 
 class FecGraph(ft.Container):
@@ -362,8 +301,10 @@ class FecGraph(ft.Container):
         self.sidebar.phases = self.phases
         self.view.phases = self.phases
 
+        self.view.upperpart.on_change = lambda e: self.update_properties(int(e.data))
+
         super().__init__(
-            **styles.get("main"),
+            **styles.interface.get("main"),
             content=ft.Row(controls=[self.view, self.sidebar], expand=True),
         )
 
@@ -372,17 +313,29 @@ class FecGraph(ft.Container):
         t_delta: str = self.sidebar.t_input.value
         p_delta: str = self.sidebar.p_input.value
 
-        if t_delta <= 1600 and t_delta >= 20:
-            self.t_counter = t_delta
-            self.sidebar.temperature.updateValue("%.0f" % self.t_counter)
+        self.t_counter = t_delta
+        self.sidebar.temperature.updateValue("%.0f" % self.t_counter)
 
-        if p_delta <= 6.67 and p_delta >= 0:
-            self.p_counter = p_delta
-            self.sidebar.percentage.updateValue("%.1f" % self.p_counter)
+        self.p_counter = p_delta
+        self.sidebar.percentage.updateValue(self.p_counter)
 
-        print(p_delta, t_delta, get_phase(p_delta, t_delta))
+        self.current_data = get_phase(p_delta, t_delta) or [{"name": "None"}]
+        self.view.upperpart.updateInfo(self.current_data)
+        self.update_properties()
+        self.update_chart()
 
-    pass
+    def update_properties(self, index=0):
+
+        properties: list = next(
+            filter(
+                lambda phase: phase.get("name") == self.current_data[index].get("name"),
+                self.phases,
+            ), {}
+        ).get("properties")
+        self.view.lowerpart.updateProperties(properties)
+
+    def update_chart(self):
+        pass
 
 
 # main
