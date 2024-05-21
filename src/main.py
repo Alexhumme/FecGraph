@@ -1,7 +1,20 @@
 # importaciones
-from utils.get_phase import main as get_phase
-import utils.styles as styles
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Cursor
+
+matplotlib.use("svg")
+
 import flet as ft
+from flet.plotly_chart import PlotlyChart
+from flet.matplotlib_chart import MatplotlibChart
+
+from utils.get_phase import main as get_phase
+from utils.phases_data import data as phases
+import utils.styles as styles
 
 # Componentes que pertenecen a la interface de la aplicacion
 # gui
@@ -18,7 +31,45 @@ appbar = ft.AppBar(
 )
 
 
-class Compoundcard(ft.Container):  # tarjeta superior de la barra derecha, muestra la estructura crristalina del compuesto
+class Sidebar(ft.Container):
+    def __init__(self):
+        super().__init__(**styles.interface.get("sidebar"))
+
+        self.phase_card = Compoundcard()
+
+        self.temperature = InfoCard(val_info=20, val_suf="°F", var_name="T°")
+        self.percentage = InfoCard(val_suf="%", var_name="C%")
+
+        self.t_input = ft.Slider(**styles.interface.get("field_t"), label="{value}°F")
+        self.p_input = ft.Slider(**styles.interface.get("field_p"), label="{value}%")
+
+        self.chartSwitcher = chartSwitcher()
+
+        self.content = ft.Column(
+            scroll=ft.ScrollMode.ADAPTIVE,
+            alignment=ft.MainAxisAlignment.START,
+            horizontal_alignment=ft.VerticalAlignment.CENTER,
+            controls=[
+                self.phase_card,
+                self.temperature,
+                self.t_input,
+                self.percentage,
+                self.p_input,
+                # self.chartSwitcher,
+            ],
+        )
+
+    def set_image(self, img_name):
+        self.phase_card.bgcolor = ft.colors.TRANSPARENT
+        self.phase_card.image_src = f"src/resources/images/{img_name}"
+        self.phase_card.image_fit = ft.ImageFit.FILL
+        self.phase_card.update()
+        pass
+
+
+class Compoundcard(
+    ft.Container
+):  # tarjeta superior de la barra derecha, muestra la estructura crristalina del compuesto
     def __init__(self):
         super().__init__(**styles.interface.get("card_main"), height=170)
         pass
@@ -86,60 +137,6 @@ class InfoSnack(
         )
 
 
-# phases: Listado de informacion sobre cada fase
-phases: list = [
-    {
-        "name": "Austenita",
-        "symbol": "y",
-        "crystal": "",
-        "description": "En este estado, los aceros son maleabes y faciles de manipular, las altas temperaturas ayudan a su uso.",
-        "properties": [
-            {"val": "Dúctil"},
-            {"name": "Rigidez", "val": "Blanda"},
-            {"val": "Tenaz"},
-        ],
-        "line": [(0, 1390), (0.3, 1450), (2.11, 1147), (0.8, 723), (0, 900)],
-        "line_properties": {"color": ft.colors.RED},
-    },
-    {
-        "name": "Ferrita",
-        "symbol": "a",
-        "crystal": "",
-        "description": "Es a fase mas banda que aparece a temperatura abiente, ,lo que la hace muy importante a pesar de su poca cantidad.",
-        "properties": [
-            {"name": "solubilidad", "val": "0.02%"},
-            {"name": "Rigidez", "val": "Blanda"},
-        ],
-        "line": [(0, 900), (0.15, 780), (0.2, 723), (0.15, 630), (0, 0)],
-        "line_properties": {"color": ft.colors.BLUE_100},
-    },
-    {
-        "name": "Cementita",
-        "symbol": "Fe3C",
-        "crystal": "",
-        "description": "Compuesto intermetalico no apropiado para procesos de deformacion plastico",
-        "properties": [
-            {"name": "Dureza", "val": "Duro"},
-            {"name": "Rigidez", "val": "Fragil"},
-        ],
-        "line": [(0.2, 723), (6.67, 723), (6.67, 0)],
-        "line_properties": {"color": ft.colors.GREEN_400},
-    },
-    {
-        "name": "Perlita",
-        "symbol": "a + Fe3C",
-        "crystal": "",
-        "description": "Se forma por la minas alternas de ferrita y cementita a menos de 723°C, posee posee propiedades de ambos.",
-        "properties": [{"name": "Resistencia", "val": "Alta"}],
-        "line": [(0.8, 723), (0.8, 0)],
-        "line_properties": {"color": ft.colors.YELLOW_200, "dash_pattern": [5, 5]},
-    },
-    {
-        "name": "Liquido",
-    },
-]
-
-
 class PhaseLine(ft.LineChartData):
     def __init__(self, phaseData: dict):
         super().__init__()
@@ -162,23 +159,42 @@ class PhaseLine(ft.LineChartData):
         return chart_data_points
 
 
-phase_lines: list = [
-    PhaseLine(phaseData=phase_data)
-    for phase_data in phases
-    if phase_data.get("line_properties")
-]
-
-
 # chart
-class FecChart(ft.LineChart):
+class FecMatPlotChart(MatplotlibChart):
     def __init__(self):
-        super().__init__(**styles.chart_styles.get("fec"))
+        super().__init__()
+        fig, ax = plt.subplots()
 
-        self.data_series = phase_lines
+        ax.set_ylabel("Temperatura (°F)")
+        ax.set_xlabel("Porcentaje de carbono (C%)")
 
-    def create_data_point(self, x, y):
-        self.test_points.append(ft.LineChartDataPoint(x, y))
-        self.update()
+        ax.set_xlim(0,7)
+        ax.set_ylim(20,1600)
+        ax.grid()
+
+        self.cursor = Cursor(ax, horizOn=True, vertOn=True, useblit=True)
+        
+        phase_lines: list = [
+            ax.plot(
+                phase_data["line_x"],
+                phase_data["line_y"],
+                phase_data["line_properties"]["color"],
+            )
+            for phase_data in phases
+            if phase_data.get("line_properties")
+        ]
+
+        ax.fill(phases[0]["line_x"],phases[0]["line_y"])
+
+        self.border = ft.Border(
+            ft.BorderSide(2, ft.colors.SURFACE),
+            ft.BorderSide(2, ft.colors.SURFACE),
+            ft.BorderSide(2, ft.colors.SURFACE),
+            ft.BorderSide(2, ft.colors.SURFACE),
+        )
+        self.border_radius = ft.BorderRadius(10, 10, 10, 10)
+        self.figure = fig
+    pass
 
 
 # view
@@ -210,36 +226,63 @@ class ViewUpperpart(ft.Tabs):
         ]
 
     def _format_tab_text(self, item):
-        pure_text = 'pura' if item.get('pure') else ''
-        num_text = str(item.get('num') or '')
-        porc_text = '%.1f' % (item.get('porc') or 0)
+        pure_text = "pura" if item.get("pure") else ""
+        num_text = str(item.get("num") or "")
+        porc_text = "%.1f" % (item.get("porc") or 0)
         return f"{item['name']} {pure_text} {num_text} ({porc_text})%"
 
     def _get_phase_description(self, phase_name):
         return next(
-            filter(lambda phase: phase.get("name") == phase_name, self.phases),
-            {}
+            filter(lambda phase: phase.get("name") == phase_name, self.phases), {}
         ).get("description")
-
 
 
 class ViewLowerpart(ft.Container):
     def __init__(self):
         super().__init__(expand=True)
-        self.chart = FecChart()
-        self.props_list_view = ft.Column(horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        self.chart = FecMatPlotChart()
+        self.props_list_view = ft.Column(
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True
+        )
         self.content = ft.Row(
             controls=[
-                ft.Container(expand=True, padding=ft.Padding(10, 10, 10, 10), content=self.chart),
-                ft.Container(**styles.interface.get("card_main"), width=220, content=self.props_list_view),
+                ft.Container(
+                    **styles.interface.get("card_tight"),
+                    expand=True,
+                    content=self.chart,
+                ),
+                ft.Container(
+                    **styles.interface.get("card_main"),
+                    width=200,
+                    content=self.props_list_view,
+                ),
             ]
         )
 
     def updateProperties(self, data):
-        info_snacks = [InfoSnack(prop.get("name"), prop.get("val")) for prop in data]
+        info_snacks = (
+            [InfoSnack(prop.get("name"), prop.get("val")) for prop in data]
+            if data
+            else []
+        )
         self.props_list_view.controls.clear()
         self.props_list_view.controls.extend(info_snacks)
         self.props_list_view.update()
+
+    def setChart(self, chart):
+        self.content = ft.Row(
+            controls=[
+                ft.Container(
+                    expand=True, padding=ft.Padding(10, 10, 10, 10), content=chart
+                ),
+                ft.Container(
+                    **styles.interface.get("card_main"),
+                    width=220,
+                    content=self.props_list_view,
+                ),
+            ]
+        )
+        self.update()
 
 
 class View(ft.Container):
@@ -250,36 +293,6 @@ class View(ft.Container):
         self.content = ft.Column(controls=[self.upperpart, self.lowerpart])
 
     pass
-
-
-class Sidebar(ft.Container):
-    def __init__(self):
-        super().__init__(**styles.interface.get("sidebar"))
-
-        self.phase_card = Compoundcard()
-
-        self.temperature = InfoCard(val_info=20, val_suf="°F", var_name="T°")
-        self.percentage = InfoCard(val_suf="%", var_name="C%")
-
-        self.t_input = ft.Slider(**styles.interface.get("field_t"), label="{value}°F")
-        self.p_input = ft.Slider(**styles.interface.get("field_p"), label="{value}%")
-
-        self.content = ft.Column(
-            scroll=ft.ScrollMode.ADAPTIVE,
-            alignment=ft.MainAxisAlignment.START,
-            horizontal_alignment=ft.VerticalAlignment.CENTER,
-            controls=[
-                self.phase_card,
-                self.temperature,
-                self.t_input,
-                self.percentage,
-                self.p_input,
-            ],
-        )
-    
-    def set_image():
-        
-        pass
 
 
 class FecGraph(ft.Container):
@@ -295,6 +308,8 @@ class FecGraph(ft.Container):
 
         self.sidebar.t_input.on_change_end = lambda e: self.update_values(e)
         self.sidebar.p_input.on_change_end = lambda e: self.update_values(e)
+
+        self.sidebar.chartSwitcher.on_change = lambda e: self.switchChart(str(e.data))
 
         self.view.lowerpart.phases = self.phases
         self.view.upperpart.phases = self.phases
@@ -330,12 +345,25 @@ class FecGraph(ft.Container):
             filter(
                 lambda phase: phase.get("name") == self.current_data[index].get("name"),
                 self.phases,
-            ), {}
+            ),
+            {},
         ).get("properties")
         self.view.lowerpart.updateProperties(properties)
 
     def update_chart(self):
         pass
+
+
+class chartSwitcher(ft.SegmentedButton):
+    def __init__(self):
+        super().__init__(
+            [
+                ft.Segment("1", label=ft.Text("f")),
+                ft.Segment("2", label=ft.Text("p")),
+                ft.Segment("3", label=ft.Text("m")),
+            ],
+            selected=[1],
+        )
 
 
 # main
@@ -350,4 +378,4 @@ def main(page: ft.Page):
     page.add(app)
 
 
-ft.app(target=main)
+ft.app(target=main, assets_dir="./resources")

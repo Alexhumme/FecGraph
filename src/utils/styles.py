@@ -19,6 +19,11 @@ interface: dict = {
         "border_radius": ft.BorderRadius(10, 10, 10, 10),
         "bgcolor": ft.colors.SURFACE,
     },
+    "card_tight": {
+        "margin": ft.Margin(0, 0, 0, 0),
+        "border_radius": ft.BorderRadius(10, 10, 10, 10),
+        "bgcolor": ft.colors.SURFACE,
+    },
     "panel": {
         "padding": ft.Padding(20, 20, 20, 20),
         "margin": ft.Margin(5, 5, 5, 5),
@@ -79,5 +84,23 @@ chart_styles: dict = {
             color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
             dash_pattern=[2],
         ),
-    }
+    },
+    "fectly": {
+        "interactive": True,
+        "expand": True,
+        "border": ft.border.all(1, ft.colors.GREY_400),
+        "left_axis": ft.ChartAxis(labels_size=40),
+        "bottom_axis": ft.ChartAxis(labels_size=40),
+        "horizontal_grid_lines": ft.ChartGridLines(
+            interval=100,
+            color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
+            width=1,
+            dash_pattern=[2],
+        ),
+        "vertical_grid_lines": ft.ChartGridLines(
+            interval=1,
+            color=ft.colors.with_opacity(0.2, ft.colors.ON_SURFACE),
+            dash_pattern=[2],
+        ),
+    },
 }
