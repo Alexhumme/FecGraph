@@ -1,7 +1,4 @@
 # importaciones
-import pandas as pd
-import numpy as np
-import plotly.express as px
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor
@@ -9,7 +6,6 @@ from matplotlib.widgets import Cursor
 matplotlib.use("svg")
 
 import flet as ft
-from flet.plotly_chart import PlotlyChart
 from flet.matplotlib_chart import MatplotlibChart
 
 from utils.get_phase import main as get_phase
@@ -58,22 +54,27 @@ class Sidebar(ft.Container):
                 # self.chartSwitcher,
             ],
         )
-
-    def set_image(self, img_name):
-        self.phase_card.bgcolor = ft.colors.TRANSPARENT
-        self.phase_card.image_src = f"src/resources/images/{img_name}"
-        self.phase_card.image_fit = ft.ImageFit.FILL
-        self.phase_card.update()
+    def updateInfo(self, data, index):
+        img_name = data[index].get('img')
+        self.phase_card.updateImage(f"/images/{img_name}")
         pass
 
-
-class Compoundcard(
-    ft.Container
-):  # tarjeta superior de la barra derecha, muestra la estructura crristalina del compuesto
+class Compoundcard(ft.Image):  # tarjeta superior de la barra derecha, muestra la estructura crristalina del compuesto
     def __init__(self):
-        super().__init__(**styles.interface.get("card_main"), height=170)
+        super().__init__(
+            height=170,
+            width=170,
+            repeat=ft.ImageRepeat.NO_REPEAT,
+            border_radius=ft.border_radius.all(10),
+            src='./eve.png'
+        )
         pass
 
+    def updateImage(self, route):
+        self.src = route
+        self.update()
+        print('actu imagen')
+        pass
 
 class InfoCard(ft.Container):  # musetra informacion de una variable en la barra lateral
     def __init__(self, val_info=0, val_suf="", var_name=""):
@@ -253,7 +254,7 @@ class ViewLowerpart(ft.Container):
                 ),
                 ft.Container(
                     **styles.interface.get("card_main"),
-                    width=200,
+                    width=220,
                     content=self.props_list_view,
                 ),
             ]
@@ -335,6 +336,7 @@ class FecGraph(ft.Container):
         self.sidebar.percentage.updateValue(self.p_counter)
 
         self.current_data = get_phase(p_delta, t_delta) or [{"name": "None"}]
+        self.sidebar.updateInfo(self.current_data, 0)
         self.view.upperpart.updateInfo(self.current_data)
         self.update_properties()
         self.update_chart()

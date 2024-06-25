@@ -17,6 +17,21 @@ data: list = [
         "img": "austenita.png"
     },
     {
+        "name": "Ledeburita",
+        "symbol": "y",
+        "crystal": "",
+        "description": "En este estado, los aceros son maleabes y faciles de manipular, las altas temperaturas ayudan a su uso.",
+        "properties": [
+            {"val": "Dúctil"},
+            {"name": "Rigidez", "val": "Blanda"},
+            {"val": "Tenaz"},
+        ],
+        "line_x": [0, 0.3, 2.11, 0.8, 0],
+        "line_y": [1390, 1450, 1147, 723, 900],
+        "line_properties": {"color": 'r'},
+        "img": "ledeburita.png"
+    },
+    {
         "name": "Ferrita",
         "symbol": "a",
         "crystal": "",
@@ -28,7 +43,7 @@ data: list = [
         "line_x": [0, 0.15, 0.2, 0.15, 0],
         "line_y": [900, 780, 723, 630, 0],
         "line_properties": {"color": 'b'},
-        "img": "austenita.png"
+        "img": "ferrita.png"
     },
     {
         "name": "Cementita",
@@ -42,7 +57,7 @@ data: list = [
         "line_x": [0.2, 6.67, 6.67],
         "line_y": [723, 723, 0],
         "line_properties": {"color": 'g'},
-        "img": "austenita.png"
+        "img": "cementita.png"
     },
     {
         "name": "Perlita",
