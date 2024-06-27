@@ -1,7 +1,9 @@
 # importaciones
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Cursor
+import matplotlib.patches as pts
+from matplotlib.lines import Line2D
+import numpy as np
 
 matplotlib.use("svg")
 
@@ -73,7 +75,6 @@ class Compoundcard(ft.Image):  # tarjeta superior de la barra derecha, muestra l
     def updateImage(self, route):
         self.src = route
         self.update()
-        print('actu imagen')
         pass
 
 class InfoCard(ft.Container):  # musetra informacion de una variable en la barra lateral
@@ -164,19 +165,36 @@ class PhaseLine(ft.LineChartData):
 class FecMatPlotChart(MatplotlibChart):
     def __init__(self):
         super().__init__()
-        fig, ax = plt.subplots()
+        fig, self.ax = plt.subplots()  # axes and figure
+        self.figure = fig
+        self.cursor = None  # Almacenamiento para el cursor
+        self.cross_lines = []  # Almacenamiento para las líneas de la cruz
 
-        ax.set_ylabel("Temperatura (°F)")
-        ax.set_xlabel("Porcentaje de carbono (C%)")
+        # appearance
+        self.border = ft.Border(
+            ft.BorderSide(2, ft.colors.SURFACE),
+            ft.BorderSide(2, ft.colors.SURFACE),
+            ft.BorderSide(2, ft.colors.SURFACE),
+            ft.BorderSide(2, ft.colors.SURFACE),
+        )
+        self.border_radius = ft.BorderRadius(10, 10, 10, 10)
 
-        ax.set_xlim(0,7)
-        ax.set_ylim(20,1600)
-        ax.grid()
+        # testing
+        self.test_index = 0
 
-        self.cursor = Cursor(ax, horizOn=True, vertOn=True, useblit=True)
-        
+        self.drawBase()
+        self.drawChart()
+
+    def drawBase(self):
+        self.ax.set_ylabel("Temperatura (°F)")
+        self.ax.set_xlabel("Porcentaje de carbono (C%)")
+        self.ax.set_xlim(0, 7)
+        self.ax.set_ylim(20, 1600)
+        self.ax.grid()
+
+    def drawChart(self):
         phase_lines: list = [
-            ax.plot(
+            self.ax.plot(
                 phase_data["line_x"],
                 phase_data["line_y"],
                 phase_data["line_properties"]["color"],
@@ -185,18 +203,56 @@ class FecMatPlotChart(MatplotlibChart):
             if phase_data.get("line_properties")
         ]
 
-        ax.fill(phases[0]["line_x"],phases[0]["line_y"])
+    def drawFill(self):
+        self.ax.fill(phases[self.test_index]["line_x"], phases[self.test_index]["line_y"])
 
-        self.border = ft.Border(
-            ft.BorderSide(2, ft.colors.SURFACE),
-            ft.BorderSide(2, ft.colors.SURFACE),
-            ft.BorderSide(2, ft.colors.SURFACE),
-            ft.BorderSide(2, ft.colors.SURFACE),
-        )
-        self.border_radius = ft.BorderRadius(10, 10, 10, 10)
-        self.figure = fig
-    pass
+    def drawCursor(self, x, y):
+        # Eliminar el cursor anterior si existe
+        if self.cursor:
+            for line in self.cross_lines: line.remove()
+            self.cross_lines = []
+            self.cursor.remove()
+            self.cursor = None
 
+        # Calculate the aspect ratio
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+        aspect_ratio = (xlim[1] - xlim[0]) / (ylim[1] - ylim[0])
+
+        # Define the radius
+        radius_x = 0.5  # Horizontal radius
+        radius_y = 1.3 * radius_x / aspect_ratio  # Vertical radius
+
+        # Calcular los vértices del polígono simétrico (en este caso, un polígono de 20 lados)
+        num_vertices = 20
+        angles = np.linspace(0, 2 * np.pi, num_vertices)
+        vertices = np.vstack((x + radius_x * np.cos(angles), y + radius_y * np.sin(angles))).T
+
+        # Dibujar el polígono con relleno semitransparente
+        self.cursor = pts.Polygon(vertices, closed=True, edgecolor='r', facecolor='r', alpha=0.5)
+        self.ax.add_patch(self.cursor)
+
+        # Draw a small cross in the center of the ellipse
+        cross_sizeX = 0.1  # Size x of the cross
+        cross_sizeY = 1.3 * cross_sizeX / aspect_ratio  # Size y of the cross
+
+        # Draw horizontal line of the cross
+        horizontal_line = Line2D([x - cross_sizeX, x + cross_sizeX], [y, y], color='black', lw=1)
+        self.ax.add_line(horizontal_line)
+        self.cross_lines.append(horizontal_line)
+
+        # Draw vertical line of the cross
+        vertical_line = Line2D([x, x], [y - cross_sizeY, y + cross_sizeY], color='black', lw=1)
+        self.ax.add_line(vertical_line)
+        self.cross_lines.append(vertical_line)
+
+    def updateChart(self, pos):
+        self.drawCursor(pos[0], pos[1]) # mover cursor
+        self.update()
+        if self.test_index + 1 < len(phases) - 1:
+            self.test_index += 1
+        else:
+            self.test_index = 0
 
 # view
 class ViewUpperpart(ft.Tabs):
@@ -307,6 +363,8 @@ class FecGraph(ft.Container):
         self.view: View = view
         self.sidebar: Sidebar = sidebar
 
+        self.sidebar.t_input.on_change = lambda e: self.view.lowerpart.chart.updateChart((self.sidebar.p_input.value, e.control.value))
+        self.sidebar.p_input.on_change = lambda e: self.view.lowerpart.chart.updateChart((e.control.value, self.sidebar.t_input.value))
         self.sidebar.t_input.on_change_end = lambda e: self.update_values(e)
         self.sidebar.p_input.on_change_end = lambda e: self.update_values(e)
 
