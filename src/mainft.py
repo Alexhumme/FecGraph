@@ -169,6 +169,7 @@ class FecMatPlotChart(MatplotlibChart):
         self.figure = fig
         self.cursor = None  # Almacenamiento para el cursor
         self.cross_lines = []  # Almacenamiento para las líneas de la cruz
+        self.filled_area = None
 
         # appearance
         self.border = ft.Border(
@@ -203,8 +204,16 @@ class FecMatPlotChart(MatplotlibChart):
             if phase_data.get("line_properties")
         ]
 
-    def drawFill(self):
-        self.ax.fill(phases[self.test_index]["line_x"], phases[self.test_index]["line_y"])
+    def drawFill(self, data):
+        if self.filled_area:
+            for patch in self.filled_area: patch.remove()
+            self.filled_area = None
+
+        phase_name = data[0].get('name')
+        matching_phase = next((phase for phase in phases if phase.get('name') == phase_name), None)
+
+        if matching_phase:
+            self.filled_area = self.ax.fill(matching_phase["line_x"], matching_phase["line_y"], alpha=0.5, color='blue')
 
     def drawCursor(self, x, y):
         # Eliminar el cursor anterior si existe
@@ -246,13 +255,10 @@ class FecMatPlotChart(MatplotlibChart):
         self.ax.add_line(vertical_line)
         self.cross_lines.append(vertical_line)
 
-    def updateChart(self, pos):
+    def updateChart(self, pos, data):
+        if data : self.drawFill(data)
         self.drawCursor(pos[0], pos[1]) # mover cursor
         self.update()
-        if self.test_index + 1 < len(phases) - 1:
-            self.test_index += 1
-        else:
-            self.test_index = 0
 
 # view
 class ViewUpperpart(ft.Tabs):
@@ -292,7 +298,6 @@ class ViewUpperpart(ft.Tabs):
         return next(
             filter(lambda phase: phase.get("name") == phase_name, self.phases), {}
         ).get("description")
-
 
 class ViewLowerpart(ft.Container):
     def __init__(self):
@@ -354,7 +359,7 @@ class View(ft.Container):
 
 class FecGraph(ft.Container):
     def __init__(self, view: View, sidebar: Sidebar):
-
+        self.current_data = None
         self.phases = phases
 
         self.t_counter = 0
@@ -363,8 +368,8 @@ class FecGraph(ft.Container):
         self.view: View = view
         self.sidebar: Sidebar = sidebar
 
-        self.sidebar.t_input.on_change = lambda e: self.view.lowerpart.chart.updateChart((self.sidebar.p_input.value, e.control.value))
-        self.sidebar.p_input.on_change = lambda e: self.view.lowerpart.chart.updateChart((e.control.value, self.sidebar.t_input.value))
+        self.sidebar.t_input.on_change = lambda e: self.view.lowerpart.chart.updateChart((self.sidebar.p_input.value, e.control.value), self.current_data)
+        self.sidebar.p_input.on_change = lambda e: self.view.lowerpart.chart.updateChart((e.control.value, self.sidebar.t_input.value), self.current_data)
         self.sidebar.t_input.on_change_end = lambda e: self.update_values(e)
         self.sidebar.p_input.on_change_end = lambda e: self.update_values(e)
 

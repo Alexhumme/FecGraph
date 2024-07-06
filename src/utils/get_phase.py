@@ -179,7 +179,7 @@ def main(
         ):  ##1147 es la temperatura del eutectico
             porc_aust, porc_liq = segm_op(
                 interp_porc(A, E, temp), interp_porc(A, C, temp), porc
-            )
+           )
             return [
                 {"name": "Liquido", "porc": porc_liq},
                 {"name": "Austenita", "porc": porc_aust},

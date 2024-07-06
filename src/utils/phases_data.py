@@ -7,13 +7,13 @@ data: list = [
         "crystal": "",
         "description": "En este estado, los aceros son maleabes y faciles de manipular, las altas temperaturas ayudan a su uso.",
         "properties": [
-            {"val": "Dúctil"},
+            {"name":"","val": "Dúctil"},
             {"name": "Rigidez", "val": "Blanda"},
-            {"val": "Tenaz"},
+            {"name":"","val": "Tenaz"},
         ],
         "line_x": [0, 0.3, 2.11, 0.8, 0],
         "line_y": [1390, 1450, 1147, 723, 900],
-        "line_properties": {"color": 'r'},
+        "color": 'r',
         "img": "austenita.png"
     },
     {
@@ -22,27 +22,27 @@ data: list = [
         "crystal": "",
         "description": "En este estado, los aceros son maleabes y faciles de manipular, las altas temperaturas ayudan a su uso.",
         "properties": [
-            {"val": "Dúctil"},
+            {"name":"","val": "Dúctil"},
             {"name": "Rigidez", "val": "Blanda"},
-            {"val": "Tenaz"},
+            {"name":"","val": "Tenaz"},
         ],
         "line_x": [0, 0.3, 2.11, 0.8, 0],
         "line_y": [1390, 1450, 1147, 723, 900],
-        "line_properties": {"color": 'r'},
+        "color": 'r',
         "img": "ledeburita.png"
     },
     {
         "name": "Ferrita",
         "symbol": "a",
         "crystal": "",
-        "description": "Es a fase mas banda que aparece a temperatura abiente, ,lo que la hace muy importante a pesar de su poca cantidad.",
+        "description": "Es a fase mas blanda que aparece a temperatura abiente, ,lo que la hace muy importante a pesar de su poca cantidad.",
         "properties": [
             {"name": "solubilidad", "val": "0.02%"},
             {"name": "Rigidez", "val": "Blanda"},
         ],
         "line_x": [0, 0.15, 0.2, 0.15, 0],
         "line_y": [900, 780, 723, 630, 0],
-        "line_properties": {"color": 'b'},
+        "color": 'b',
         "img": "ferrita.png"
     },
     {
@@ -56,7 +56,7 @@ data: list = [
         ],
         "line_x": [0.2, 6.67, 6.67],
         "line_y": [723, 723, 0],
-        "line_properties": {"color": 'g'},
+        "color": 'g',
         "img": "cementita.png"
     },
     {
@@ -67,7 +67,7 @@ data: list = [
         "properties": [{"name": "Resistencia", "val": "Alta"}],
         "line_x": [0.8, 0.8],
         "line_y": [723, 0],
-        "line_properties": {"color": 'y', "dash_pattern": [5, 5]},
+        "color": 'y',
         "img": "austenita.png"
     },
     {
