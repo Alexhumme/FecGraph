@@ -13,7 +13,7 @@ data: list = [
         ],
         "line_x": [0, 0.3, 2.11, 0.8, 0],
         "line_y": [1390, 1450, 1147, 723, 900],
-        "color": 'r',
+        "color": "#EE6055",
         "img": "austenita.png"
     },
     {
@@ -26,9 +26,9 @@ data: list = [
             {"name": "Rigidez", "val": "Blanda"},
             {"name":"","val": "Tenaz"},
         ],
-        "line_x": [0, 0.3, 2.11, 0.8, 0],
-        "line_y": [1390, 1450, 1147, 723, 900],
-        "color": 'r',
+        "line_x": [1.76, 6.67, 6.67, 1.76],
+        "line_y": [1130, 1130, 723, 723],
+        "color": "#60D394",
         "img": "ledeburita.png"
     },
     {
@@ -42,8 +42,19 @@ data: list = [
         ],
         "line_x": [0, 0.15, 0.2, 0.15, 0],
         "line_y": [900, 780, 723, 630, 0],
-        "color": 'b',
+        "color": "#AAF683",
         "img": "ferrita.png"
+    },
+    {
+        "name": "Perlita",
+        "symbol": "a + Fe3C",
+        "crystal": "",
+        "description": "Se forma por la minas alternas de ferrita y cementita a menos de 723°C, posee posee propiedades de ambos.",
+        "properties": [{"name": "Resistencia", "val": "Alta"}],
+        "line_x": [0.8, 1.76, 1.76, 0.8],
+        "line_y": [723, 723, 0, 0],
+        "color": "#FF9B85",
+        "img": "austenita.png"
     },
     {
         "name": "Cementita",
@@ -54,21 +65,10 @@ data: list = [
             {"name": "Dureza", "val": "Duro"},
             {"name": "Rigidez", "val": "Fragil"},
         ],
-        "line_x": [0.2, 6.67, 6.67],
+        "line_x": [1.76, 6.67, 6.67],
         "line_y": [723, 723, 0],
-        "color": 'g',
+        "color": "#FFD97D",
         "img": "cementita.png"
-    },
-    {
-        "name": "Perlita",
-        "symbol": "a + Fe3C",
-        "crystal": "",
-        "description": "Se forma por la minas alternas de ferrita y cementita a menos de 723°C, posee posee propiedades de ambos.",
-        "properties": [{"name": "Resistencia", "val": "Alta"}],
-        "line_x": [0.8, 0.8],
-        "line_y": [723, 0],
-        "color": 'y',
-        "img": "austenita.png"
     },
     {
         "name": "Liquido",

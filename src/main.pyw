@@ -32,7 +32,7 @@ class InteractivePlot(ttk.Frame):
                 polygon = self.ax.fill_between(
                         phase.get('line_x'),
                         phase.get('line_y'),
-                        alpha=0.4,
+                        alpha=0.5,
                         edgecolor='black',
                         facecolor=phase.get('color'),
                         linewidth=2
@@ -62,7 +62,7 @@ class InteractivePlot(ttk.Frame):
             # si hay hover, cambia el tooltip colorea la fase, sino muestra las coordenadas
             if hovered_phase:
                 tip = f"C%={x:.2f}, T°={y:.2f} : {phase['name']}"
-                polygon.set_alpha(0.7) # rellenar poligonos
+                polygon.set_alpha(1) # rellenar poligonos
             else: tip = f"C%={x:.2f}, T°={y:.2f}"
 
             self.tooltip = self.ax.annotate(
@@ -105,6 +105,10 @@ class PercPlot(ttk.Frame):
         self.temp_label = ttk.Label(self, text="temp", image=t_icon)
         self.temp_label.grid(row=0, column=1, sticky="w")
 
+        centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+        self.fig = plt.gcf()
+        self.fig.gca().add_artist(centre_circle)
+ 
         self.plot:FigureCanvasTkAgg = FigureCanvasTkAgg(self.fig, master=self)
         self.plot.draw()
         self.plot.get_tk_widget().grid(row=1, column=0, columnspan=2,sticky="nsew")
@@ -118,6 +122,11 @@ class PercPlot(ttk.Frame):
             autopct='%1.1f%%',
             explode=[0.1 if i == o-1 else 0 for o in range(len(phases))]
         )
+
+        centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+        self.fig = plt.gcf()
+        self.fig.gca().add_artist(centre_circle)
+        
         self.plot.draw_idle()
 
 class Sidebar(ttk.Frame):
@@ -176,7 +185,8 @@ class Sidebar(ttk.Frame):
         if data.get('img'): 
             img = Image.open(f"./src/resources/images/{data.get('img')}")
             img = img.resize((200,200))
-            self.image_card.config(image=ImageTk.PhotoImage(img))
+            self.img = ImageTk.PhotoImage(img)
+            self.image_card.config(image=self.img)
         
         self.info_card.config(text=f"{data.get('description')}")
 
