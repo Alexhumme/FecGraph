@@ -33,8 +33,8 @@ class InteractivePlot(ttk.Frame):
                         phase.get('line_x'),
                         phase.get('line_y'),
                         alpha=0.4,
-                        #edgecolor=phase.get('color'),
-                        #facecolor=phase.get('color'),
+                        edgecolor='black',
+                        facecolor=phase.get('color'),
                         linewidth=2
                     )
                 self.polygons.append((polygon, phase))
@@ -61,9 +61,9 @@ class InteractivePlot(ttk.Frame):
 
             # si hay hover, cambia el tooltip colorea la fase, sino muestra las coordenadas
             if hovered_phase:
-                tip = f"{phase['name']}"
+                tip = f"C%={x:.2f}, T°={y:.2f} : {phase['name']}"
                 polygon.set_alpha(0.7) # rellenar poligonos
-            else: tip = f"x={x:.2f}, y={y:.2f}"
+            else: tip = f"C%={x:.2f}, T°={y:.2f}"
 
             self.tooltip = self.ax.annotate(
                 tip,
@@ -92,31 +92,33 @@ class PercPlot(ttk.Frame):
         self.rowconfigure(1, weight=3)
 
         self.fig, self.ax = plt.subplots(figsize=(2, 1))
-        self.ax.pie(
-            [1],
-            #explode=self.explode,
-            #labels=self.labels,
-            #colors=self.colors,
-            #autopct='%1.1f%%',
-            #shadow=True,
-            #startangle=140
-        )
+        self.ax.pie([1])
         self.ax.axis('equal')  # Asegurar que el diagrama de pastel es circular
         self.create_controls()
 
     def create_controls(self):
-        p_icon = ImageTk.PhotoImage(Image.open(r'./src/resources/icons/porc.png').resize((10,10)))
+        p_icon = ImageTk.PhotoImage(Image.open('src/resources/icons/porc.png').resize((10,10)))
         self.porc_label = ttk.Label(self, text='porc', image=p_icon)
         self.porc_label.grid(row=0, column=0, sticky="e")
 
-        t_icon = ImageTk.PhotoImage(Image.open(r'./src/resources/icons/temp.png'))
+        t_icon = ImageTk.PhotoImage(Image.open('src/resources/icons/temp.png'))
         self.temp_label = ttk.Label(self, text="temp", image=t_icon)
         self.temp_label.grid(row=0, column=1, sticky="w")
 
-        self.plot = FigureCanvasTkAgg(self.fig, master=self)
+        self.plot:FigureCanvasTkAgg = FigureCanvasTkAgg(self.fig, master=self)
         self.plot.draw()
         self.plot.get_tk_widget().grid(row=1, column=0, columnspan=2,sticky="nsew")
-
+    
+    def load_phases(self,phases,i):
+        self.ax.clear()
+        self.ax.pie(
+            [item.get('porc') for item in phases],
+            labels=[item.get('name') for item in phases],
+            colors=[item.get('color') for item in phases],           
+            autopct='%1.1f%%',
+            explode=[0.1 if i == o-1 else 0 for o in range(len(phases))]
+        )
+        self.plot.draw_idle()
 
 class Sidebar(ttk.Frame):
     def __init__(self, master):
@@ -127,27 +129,56 @@ class Sidebar(ttk.Frame):
         self.rowconfigure(2, weight=2)
         self.rowconfigure(3, weight=3)
         self.create_controls()
+        self.phases_data = None
 
     def create_controls(self):
-        self.name_card = ttk.Label(self, text='Seleccionar', borderwidth=2, relief="solid")
+        self.name_card = ttk.Label(
+            self, 
+            text='Seleccionar', 
+            borderwidth=2, 
+            relief="solid", 
+            justify='center',
+            anchor='center'
+        )
         self.name_card.grid(row=0,column=0, sticky="nsew")
 
         self.perc_card = PercPlot(self)
         self.perc_card.grid(row=1, column=0, sticky="nsew")
 
-        self.image_card = ttk.Label(self, text="imagen de la fase seleccionada", borderwidth=2, relief="solid")
+        self.image_card = ttk.Label(self, borderwidth=2, relief="solid")
         self.image_card.grid(row=2, column=0, sticky="nsew")
 
-        self.info_card = ttk.Label(self, text="info de la fase seleccionada", borderwidth=2, relief="solid")
+        self.info_card = ttk.Label(
+                self, 
+                text="info de la fase seleccionada", 
+                borderwidth=2, 
+                relief="solid", 
+                anchor='n', 
+                justify='left', 
+                wraplength=250
+        )
         self.info_card.grid(row=3, column=0, sticky="nsew")
 
     def handle_graph_click(self, event):
         x, y = event.xdata, event.ydata
         print(f'evento:({x},{y})')
+        self.phases_data = get_phase(x, y)
+        self.load_data(0)
 
-    def load_data(pos):
-        porc, temp = pos
-        data = get_phase()
+    def load_data(self, index):
+        data:dict = self.phases_data[index]
+
+        self.name_card.config(
+            text=f"{data.get('name')} {'pura' if data.get('pure') else ''} {data.get('num') or ''}")
+        
+        self.perc_card.load_phases(self.phases_data, index)
+
+        if data.get('img'): 
+            img = Image.open(f"./src/resources/images/{data.get('img')}")
+            img = img.resize((200,200))
+            self.image_card.config(image=ImageTk.PhotoImage(img))
+        
+        self.info_card.config(text=f"{data.get('description')}")
 
 class MainApp(tk.Tk):
     def __init__(self):

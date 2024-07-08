@@ -11,8 +11,8 @@
 2. posicionamiento de elementos:
 	- por defecto, los elementos se posicionan en forma de columna dentro de la ventana
 	- pack:
-		+	se le pueden pasar los argumentos side cuyos valores por defecto son tk.TOP, .BOTTOM, .LEFT y .RIGHT al metodo pack para indicar donde quieres poner el elementos
-		+	se le puede pasar el metodo before o after a pack y de argumento un elemento para indicar que el elemento posicionado debe de estar antes o despues del pasado como argumento
+		+ se le pueden pasar los argumentos side cuyos valores por defecto son tk.TOP, .BOTTOM, .LEFT y .RIGHT al metodo pack para indicar donde quieres poner el elementos
+		+ se le puede pasar el metodo before o after a pack y de argumento un elemento para indicar que el elemento posicionado debe de estar antes o despues del pasado como argumento
 		+ padx y pady para los margenes
 		+ ipadx e ipady para los padding
 		+ expand = bool y fill = tk.X o tk.Y o tk.BOTH para indicar a donde quieres que se expanda
@@ -35,7 +35,7 @@
 	- Texto cualquiera: Label
 	- contenedor: Frame
 6. estiizado
-	-	bg y fg : color de fondo y del texto para cualquier widget
+	- bg y fg : color de fondo y del texto para cualquier widget
 	- Frame.config / argumentos :
 		+	cursor : estio de cursor
 		+ relief : estilo del borde

@@ -1,6 +1,6 @@
+from .phases_data import data as phases 
+
 ## Defino una clase donde voy a almacenar cada par de puntos del grafico (con su temp y $ de C)
-
-
 class punto:
     def __init__(self, porc, temp):
         self.porc = porc
@@ -45,7 +45,7 @@ def segm_op(porc_sat_izq, porc_sat_der, porc_mezcla):
     return porc_izq * 100, porc_der * 100
 
 
-def main(
+def get_phase(
     porc, temp
 ):  ## La funcion va a tomar como parametro el punto, y va a devolver el nombre del estado y los porc en caso de ser mezcla
 
@@ -296,13 +296,12 @@ def main(
             else:
                 return 1
 
-
-import numpy as np
-
-temp_list = np.arange(1500, 200, -50)
-porc_list = [0.01, 0.3, 1.3, 3, 5]
-
-if __name__ == "main":
-    for p in porc_list:
-        for t in temp_list:
-            print(p, t, main(p, t))
+def main(p,t):
+    data = get_phase(p, t)
+    anexed =  [ 
+        {   
+            **item, 
+            **next((phase for phase in phases if phase.get('name') == item.get('name')), None)
+        } for item in data
+    ]
+    return anexed
