@@ -10,19 +10,23 @@ import numpy as np
 
 class InteractivePlot(ttk.Frame):
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, width=800, padding=20)
 
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.ax.set_facecolor("#FAFAFA")
+        self.fig.set_facecolor("#FAFAFA")
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=1)
 
         # configuracion de la grafica
+        plt.title("Diagrama hierro carbono")
         self.ax.set_xlabel("Porcentaje de carbono (C%)")
         self.ax.set_ylabel("Temperatura (°F)")
         self.ax.set_xlim(0, 7)
         self.ax.set_ylim(20, 1600)
         self.ax.grid()
+        self.labels = []
 
         # Add data from phases as polygons
         self.polygons = []
@@ -38,6 +42,10 @@ class InteractivePlot(ttk.Frame):
                         linewidth=2
                     )
                 self.polygons.append((polygon, phase))
+                x_center = np.mean(phase.get('line_x'))
+                y_center = np.mean(phase.get('line_y'))
+                label = self.ax.annotate(phase["name"], xy=(x_center, y_center), ha='center', va='center', fontsize=10, color='black', weight='bold')
+                self.labels.append(label)
 
         self.canvas.mpl_connect("motion_notify_event", self.on_hover)
         self.tooltip = None
@@ -86,23 +94,25 @@ class InteractivePlot(ttk.Frame):
 
 class PercPlot(ttk.Frame):
     def __init__(self, master):
-        super().__init__(master, borderwidth=2, relief="solid")
+        super().__init__(master, style="Card.TFrame", padding=15)
         
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=3)
 
         self.fig, self.ax = plt.subplots(figsize=(2, 1))
+        self.ax.set_facecolor("#FAFAFA")
+        self.fig.set_facecolor("#FAFAFA")
         self.ax.pie([1])
         self.ax.axis('equal')  # Asegurar que el diagrama de pastel es circular
         self.create_controls()
 
     def create_controls(self):
-        p_icon = ImageTk.PhotoImage(Image.open('src/resources/icons/porc.png').resize((10,10)))
-        self.porc_label = ttk.Label(self, text='porc', image=p_icon)
+        self.p_icon = ImageTk.PhotoImage(Image.open('src/resources/icons/porc.png').resize((30,30)))
+        self.porc_label = ttk.Label(self, text='porc', image=self.p_icon)
         self.porc_label.grid(row=0, column=0, sticky="e")
 
-        t_icon = ImageTk.PhotoImage(Image.open('src/resources/icons/temp.png'))
-        self.temp_label = ttk.Label(self, text="temp", image=t_icon)
+        self.t_icon = ImageTk.PhotoImage(Image.open('src/resources/icons/temp.png').resize((30,30)))
+        self.temp_label = ttk.Label(self, text="temp", image=self.t_icon)
         self.temp_label.grid(row=0, column=1, sticky="w")
 
         centre_circle = plt.Circle((0, 0), 0.70, fc='white')
@@ -113,17 +123,19 @@ class PercPlot(ttk.Frame):
         self.plot.draw()
         self.plot.get_tk_widget().grid(row=1, column=0, columnspan=2,sticky="nsew")
     
-    def load_phases(self,phases,i):
+    def load_phases(self,phases,i,point):
+        p, t = point
         self.ax.clear()
         self.ax.pie(
             [item.get('porc') for item in phases],
-            labels=[item.get('name') for item in phases],
+            labels=[item.get('symbol') for item in phases],
             colors=[item.get('color') for item in phases],           
             autopct='%1.1f%%',
             explode=[0.1 if i == o-1 else 0 for o in range(len(phases))]
         )
-
         centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+        self.temp_label.config(text=f'{t}')
+        self.porc_label.config(text=f'{p}')
         self.fig = plt.gcf()
         self.fig.gca().add_artist(centre_circle)
         
@@ -131,7 +143,7 @@ class PercPlot(ttk.Frame):
 
 class Sidebar(ttk.Frame):
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, style="Card.TFrame", width=200, padding=15)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=2)
@@ -157,20 +169,20 @@ class Sidebar(ttk.Frame):
         self.image_card = ttk.Label(self, borderwidth=2, relief="solid")
         self.image_card.grid(row=2, column=0, sticky="nsew")
 
-        self.info_card = ttk.Label(
-                self, 
-                text="info de la fase seleccionada", 
-                borderwidth=2, 
-                relief="solid", 
-                anchor='n', 
-                justify='left', 
-                wraplength=250
+        self.info_card = tk.Text(
+            self,  
+            wrap=tk.WORD, 
+            state=tk.DISABLED,
+            borderwidth=2, 
+            relief="solid",
+            width=10,
+            height=10
         )
         self.info_card.grid(row=3, column=0, sticky="nsew")
 
     def handle_graph_click(self, event):
-        x, y = event.xdata, event.ydata
-        print(f'evento:({x},{y})')
+        self.point = (event.xdata, event.ydata)
+        x, y = self.point
         self.phases_data = get_phase(x, y)
         self.load_data(0)
 
@@ -180,15 +192,18 @@ class Sidebar(ttk.Frame):
         self.name_card.config(
             text=f"{data.get('name')} {'pura' if data.get('pure') else ''} {data.get('num') or ''}")
         
-        self.perc_card.load_phases(self.phases_data, index)
+        self.perc_card.load_phases(self.phases_data, index, self.point)
 
         if data.get('img'): 
             img = Image.open(f"./src/resources/images/{data.get('img')}")
-            img = img.resize((200,200))
+            img = img.resize((120,120))
             self.img = ImageTk.PhotoImage(img)
             self.image_card.config(image=self.img)
         
-        self.info_card.config(text=f"{data.get('description')}")
+        self.info_card.config(state = tk.NORMAL)
+        self.info_card.delete(1.0, tk.END)
+        self.info_card.insert(tk.END, f"{data.get('description')}")
+        self.info_card.config(state = tk.DISABLED)
 
 class MainApp(tk.Tk):
     def __init__(self):
@@ -198,42 +213,23 @@ class MainApp(tk.Tk):
         self.geometry("1000x600")
 
         # layout principal
-        app_container: ttk.Frame = ttk.Frame(self)
-        app_container.pack(fill=tk.BOTH, expand=True)
-
-        # configurar layout principal
-        app_container.rowconfigure(0, weight=1)
-        app_container.columnconfigure(0, weight=3)
-        app_container.columnconfigure(1, weight=1)
+        app_container: ttk.Frame = ttk.Frame(self, padding=20, style='Card.TFrame')
+        app_container.pack(expand=True)
 
         # componentes
 
         self.sidebar = Sidebar(app_container)
-        self.sidebar.grid(row=0, column=1, sticky="nsew")
+        self.sidebar.pack(side=tk.RIGHT)
 
         self.plot_frame = InteractivePlot(app_container)
-        self.plot_frame.grid(row=0, column=0, sticky="nsew")
+        self.plot_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.plot_frame.canvas.mpl_connect(
             "button_press_event", 
             self.sidebar.handle_graph_click
         )
-        #self.update_image_button = tk.Button(self, text="Update Image", command=self.update_image)
-        #self.update_image_button.pack()
-
-        #self.image_label = tk.Label(self)
-        #self.image_label.pack()
-        #self.image = None
 
         # Tema de estilo
         sv_ttk.set_theme("light")
-
-    #def update_image(self):
-        # Your logic to update image goes here
-        #route = "path_to_your_image.png"
-        #img = Image.open(route)
-        #img = img.resize((200, 200), Image.ANTIALIAS)
-        #self.image = ImageTk.PhotoImage(img)
-        #self.image_label.config(image=self.image)
 
 if __name__ == "__main__":
     app = MainApp()
