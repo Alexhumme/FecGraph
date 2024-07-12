@@ -18,9 +18,9 @@ class InteractivePlot(ttk.Frame):
         # configuracion de la grafica
         plt.title("Diagrama hierro carbono")
         self.ax.set_xlabel("Porcentaje de carbono (C%)")
-        self.ax.set_ylabel("Temperatura (°F)")
-        self.ax.set_xlim(0, 7)
-        self.ax.set_ylim(20, 1600)
+        self.ax.set_ylabel("Temperatura (°C)")
+        self.ax.set_xlim(0, 6.67)
+        self.ax.set_ylim(0, 1600)
         self.ax.grid()
         self.labels = []
 
@@ -37,7 +37,7 @@ class InteractivePlot(ttk.Frame):
 
         t_card = ttk.Frame(data_bar, style='Card.TFrame', padding=(10,5))
         t_card.pack(side=tk.RIGHT)
-        self.t_label = ttk.Label(t_card, text="0°F")
+        self.t_label = ttk.Label(t_card, text="0°C")
         self.t_label.pack(expand=True, fill=tk.BOTH)
 
         p_card = ttk.Frame(data_bar, style='Card.TFrame', padding=(10,5))
@@ -65,13 +65,13 @@ class InteractivePlot(ttk.Frame):
                         alpha=0.5,
                         edgecolor='black',
                         facecolor=phase.get('color'),
-                        linewidth=2
+                        linewidth=0.1
                     )
                 self.polygons.append((polygon, phase))
                 x_center = np.mean(phase.get('line_x'))
                 y_center = np.mean(phase.get('line_y'))
                 label = self.ax.annotate(
-                    f'{phase["name"]}\n{phase["symbol"]}', 
+                    f'{phase["name"] if not phase.get("noname") else ""}\n{phase.get("symbol") or "" if not phase.get("nosym") else ""}', 
                     xy=(x_center, y_center), 
                     ha='center', 
                     va='center', 
@@ -101,7 +101,7 @@ class InteractivePlot(ttk.Frame):
 
             # si hay hover, cambia el tooltip colorea la fase, sino muestra las coordenadas
             if hovered_phase:
-                tip = f"C%={x:.2f}, T°={y:.2f} : {phase['name']}"
+                tip = f"{phase['name']} {phase.get('symbol') or ''}\nC%={x:.2f}, T°={y:.2f}"
                 polygon.set_alpha(1) # rellenar poligonos
             else: tip = f"C%={x:.2f}, T°={y:.2f}"
 
@@ -124,7 +124,7 @@ class InteractivePlot(ttk.Frame):
     def update_cards(self, event):
         p, t = (event.xdata, event.ydata)
 
-        self.t_label.config(text=f'{t:.2f}°F')
+        self.t_label.config(text=f'{t:.2f}°C')
         self.p_label.config(text=f'{p:.2f}%')       
 
 class PercPlot(ttk.Frame):
