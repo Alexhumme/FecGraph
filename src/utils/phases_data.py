@@ -1,4 +1,3 @@
-import flet as ft
 # phases: Listado de informacion sobre cada fase
 data: list = [
     {
