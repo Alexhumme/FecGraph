@@ -25,8 +25,8 @@ To install and run the project, follow these steps:
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/Alexhumme/GraphFec.git
-    cd GraphFec
+    git clone https://github.com/Alexhumme/FecGraph.git
+    cd FecGraph
     ```
 
 2. **Create and activate a virtual environment:**
