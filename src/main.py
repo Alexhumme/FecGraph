@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageTk
 from utils.get_phase import main as get_phase
 from utils.phases_data import data as phases
+from utils.resource_path import resource_path
 import numpy as np
+import sys
 
 class InteractivePlot(ttk.Frame):
     def __init__(self, master):
@@ -289,7 +291,7 @@ class Sidebar(ttk.Frame):
         self.perc_card.load_phases(self.phases_data, index)
 
         if data.get('img'): 
-            img = Image.open(f"./src/resources/images/{data.get('img')}")
+            img = Image.open(resource_path(f"src/resources/images/{data.get('img')}"))
             img = img.resize((120,120))
             self.img = ImageTk.PhotoImage(img)
             self.image_card.config(image=self.img)
@@ -300,8 +302,10 @@ class MainApp(tk.Tk):
     def __init__(self):
         super().__init__()
 
+        self.iconbitmap(resource_path("src/resources/icons/favicon.ico"))
         self.title("Diagrama Hierro Carbono Interactivo")
         self.geometry("1000x600")
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # layout principal
         app_container: ttk.Frame = ttk.Frame(self, padding=20, style='Card.TFrame')
@@ -325,6 +329,10 @@ class MainApp(tk.Tk):
     def handle_graph_click(self, event):
         self.sidebar.handle_graph_click(event)
         self.plot_frame.update_cards(event)
+    
+    def on_close(self):
+        self.destroy()
+        sys.exit()  # Finaliza el proceso completamente
 
 if __name__ == "__main__":
     app = MainApp()
