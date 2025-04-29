@@ -1,56 +1,64 @@
-# Iron-Carbon Phase Diagram Interactive Tool
+# FecGraph – Herramienta Interactiva del Diagrama Hierro-Carbono
+
 <center>
-<img src="https://i.imgur.com/6d8iS62.png">
+<img src="https://i.imgur.com/6d8iS62.png" alt="Logo FecGraph" width="200"/>
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
 ![Tkinter](https://img.shields.io/badge/Tkinter-%20Tkinter%20-blue.svg)
 ![Matplotlib](https://img.shields.io/badge/Matplotlib-3.x-blue.svg)
 </center>
 
-## Description
+## Descripción
 
-The Iron-Carbon Phase Diagram Interactive Tool is a graphical application that allows users to interact with the iron-carbon phase diagram. It provides a visual representation of different phases (like Austenite, Ferrite, Cementite, etc.) and allows users to hover over the regions to see more information, such as phase names and images. This tool is built using Python, Tkinter for the GUI, and Matplotlib for plotting the diagrams.
+**FecGraph** es una aplicación de escritorio interactiva desarrollada en Python que permite visualizar y explorar el diagrama hierro-carbono de forma didáctica. Está diseñada para apoyar procesos de enseñanza y aprendizaje en el área de metalurgia, mostrando en tiempo real las diferentes fases (Austenita, Ferrita, Cementita, etc.) con información visual y textual relevante.
 
-## Features
+El programa está destinado al uso institucional dentro del plantel educativo de la Universidad de La Guajira, y su distribución está restringida a fines académicos.
 
-- Display the iron-carbon phase diagram with interactive polygons representing different phases.
-- Show tooltips with phase names and images when hovering over the polygons.
-- Dynamically adjust the alpha of the polygons on hover to highlight them.
-- Easily update phase data and re-render the diagram.
+## Funcionalidades
 
-## Installation
+- Visualización del diagrama hierro-carbono con límites personalizables.
+- Interacción con polígonos que representan las distintas fases metalográficas.
+- Tooltips al pasar el cursor sobre cada fase, mostrando su nombre e imagen.
+- Cambios visuales dinámicos en la opacidad de cada región al hacer hover.
+- Visualización detallada de cada fase seleccionada en un panel lateral.
 
-To install and run the project, follow these steps:
+## Requisitos del sistema
 
-1. **Clone the repository:**
+- Sistema operativo: **Windows 10 o superior**
+- Memoria RAM: **4 GB mínimo**
+- Python 3.10+ (solo durante desarrollo)
+- No requiere conexión a internet
+
+> Nota: Aunque actualmente solo se encuentra disponible para Windows, se prevé en futuras versiones ofrecer soporte para otros sistemas operativos.
+
+## Instalación
+
+1. **Clona el repositorio:**
 
     ```sh
     git clone https://github.com/Alexhumme/FecGraph.git
     cd FecGraph
     ```
 
-2. **Create and activate a virtual environment:**
+2. **Crea y activa un entorno virtual:**
 
     ```sh
-    python -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    python -m venv .venv
+    .venv\\Scripts\\activate  # En Windows
     ```
 
-3. **Install the dependencies:**
+3. **Instala las dependencias:**
 
     ```sh
     pip install -r requirements.txt
     ```
 
-## Running the Project
+## Ejecución del proyecto
 
-To run the project, execute the following command:
+Para iniciar la aplicación, ejecuta:
 
 ```sh
 python ./src/main.py
-```
-
-This will start the application, and you will be able to interact with the iron-carbon phase diagram.
 
 ## License
 
@@ -61,4 +69,4 @@ Contributions are welcome! Please create an issue or submit a pull request if yo
 
 ## Contact
 
-For any questions or suggestions, feel free to reach out to avaldelamarb@uniguajira.edu.co
+For any questions or suggestions, feel free to reach out to support@uniguajira.edu.co

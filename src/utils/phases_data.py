@@ -34,7 +34,7 @@ data: list = [
         "line_x": [0.8, 2.11, 2.11, 0.8],
         "line_y": [723, 723, 0, 0],
         "color": "#FF9B85",
-        "img": "austenita.png"
+        "img": "perlita.png"
     },
     {
         "name": "Cementita",

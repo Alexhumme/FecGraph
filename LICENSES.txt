@@ -1,0 +1,91 @@
+GraphFec - Licencias de Componentes de Terceros
+-----------------------------------------------
+
+Este software incluye bibliotecas de código abierto utilizadas bajo licencias permisivas.
+A continuación se detallan los componentes relevantes y sus respectivas licencias.
+
+------------------------------------------------------------
+1. Pillow (https://python-pillow.org)
+   Licencia: Historical Permission Notice and Disclaimer (HPND)
+
+   Este software incluye partes del código fuente de la biblioteca Pillow.
+   Copyright (c) 1997-2011 by Secret Labs AB.
+   Copyright (c) 1995-2011 by Fredrik Lundh.
+
+   Se permite el uso, copia, modificación y distribución de este software con o sin modificaciones,
+   siempre que se incluya este aviso de copyright. El software se proporciona "tal cual", sin garantías.
+
+------------------------------------------------------------
+2. Matplotlib (https://matplotlib.org)
+   Licencia: BSD 3-Clause License
+
+   Copyright (c) 2012- Matplotlib Development Team.
+   Todos los derechos reservados.
+
+   Redistribución y uso en formas de código fuente y binario, con o sin modificaciones,
+   están permitidos siempre que se cumplan las siguientes condiciones:
+
+   - Debe conservarse el aviso de copyright.
+   - No puede utilizar el nombre de Matplotlib ni el de sus contribuidores para promocionar
+     productos derivados sin permiso expreso.
+
+------------------------------------------------------------
+3. PyInstaller (https://www.pyinstaller.org/)
+   Licencia: GPL v2 con excepción de uso en aplicaciones comerciales
+
+   Este ejecutable ha sido creado con PyInstaller, que incluye un bootloader bajo licencia GPL v2
+   con una excepción que permite su uso en aplicaciones comerciales sin que éstas estén obligadas
+   a ser GPL. Más información en: https://pyinstaller.org/license.html
+
+------------------------------------------------------------
+4. Sun Valley ttk theme for Tkinter
+   Licencia: MIT License
+
+   Copyright (c) 2021 rdbende
+
+   Se permite el uso, copia, modificación, fusión, publicación, distribución,
+   sublicenciamiento y/o venta del software, siempre que se incluya este aviso de licencia
+   y la renuncia de responsabilidad. El software se proporciona "tal cual", sin garantías.
+
+Imágenes en dominio público
+
+1. austenita.png
+   Fuente: Wikimedia Commons  
+   Autor: probablemente Dr. K. Natesan  
+   Licencia: Dominio público (obras del gobierno de EE.UU.)  
+   URL: https://commons.wikimedia.org/wiki/File:Stainless-steel-304-austenite-fracture.jpeg
+
+2. perlita.png
+   Fuente: Wikimedia Commons  
+   Autor: Michelshock, Public domain, via Wikimedia Commons Dr. K. Natesan  
+   Licencia: Dominio público (obras del gobierno de EE.UU.)  
+   URL: https://upload.wikimedia.org/wikipedia/commons/7/77/Pearlite.jpg
+
+3. liquido.png
+   Fuente: Wikimedia Commons  
+   Autor: Valandil1983, CC BY-SA 3.0 <http://creativecommons.org/licenses/by-sa/3.0/>, via Wikimedia Commons
+   Licencia: Creative Commons 
+   URL: https://upload.wikimedia.org/wikipedia/commons/d/d8/Melted_raw-iron.jpg
+
+4. ledeburita.png
+   Fuente: Wikimedia Commons  
+   Autor: Eisenbeisser, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
+   Licencia: Creative Commons 
+   URL: https://upload.wikimedia.org/wikipedia/commons/b/be/Ledeburit2.jpg
+
+5. ledeburita.png
+   Fuente: Wikimedia Commons  
+   Autor: Melancholia~itwiki, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+   Licencia: Creative Commons 
+   URL: https://upload.wikimedia.org/wikipedia/commons/1/1e/20180323_-_ferrite_perlite_1000x.jpg
+
+6. cementita.png
+   Fuente: ecured.cu
+   Autor: Guliáev, A. P. Metalografía. Tomo I. Editorial Mir Moscú.
+   Licencia: Creative Commons 
+   URL: https://www.ecured.cu/Archivo:Cementita_Cristalina.jpg
+
+Se incluye en este software conforme a los términos de dominio público y puede ser redistribuida libremente.
+
+Este documento forma parte del paquete distribuido de GraphFec. Para más información o consultas legales,
+contacte al desarrollador o revise los archivos LICENSE individuales incluidos con el software.
