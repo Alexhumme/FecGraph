@@ -59,6 +59,7 @@ Para iniciar la aplicación, ejecuta:
 
 ```sh
 python ./src/main.py
+```
 
 ## License
 
