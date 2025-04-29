@@ -1,7 +1,7 @@
 # FecGraph – Herramienta Interactiva del Diagrama Hierro-Carbono
 
 <center>
-<img src="https://i.imgur.com/6d8iS62.png" alt="Logo FecGraph" width="200"/>
+<img src="https://i.imgur.com/6d8iS62.png">
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
 ![Tkinter](https://img.shields.io/badge/Tkinter-%20Tkinter%20-blue.svg)
